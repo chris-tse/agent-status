@@ -1,0 +1,119 @@
+# Status Dashboard
+
+A local prototype that turns provider-neutral agent status into a browser
+dashboard and stable Stream Deck key assignments.
+
+See [`docs/product-brief.md`](docs/product-brief.md) for the product vision,
+scope, and long-term architecture.
+
+## Architecture
+
+- `packages/model` defines the Zod-validated snapshot, update, reset, provider,
+  resource, and event contracts shared over HTTP and WebSocket.
+- `apps/service` is a Bun HTTP/WebSocket service. Its simulated provider seeds
+  representative running, waiting, completed, and failed agents and exposes
+  deterministic demo transitions.
+- `apps/dashboard` is a React/Vite client. It loads an initial snapshot, applies
+  sequential WebSocket updates, and refetches after reset or a version gap.
+- `apps/stream-deck` is an Elgato SDK plugin. Visible Agent Slot actions form a
+  stable priority pool and consume the same validated wire messages.
+
+All workspace dependency links use Bun workspaces and
+`@status-dashboard/model`.
+
+## Requirements
+
+- Bun 1.3.14 for installing dependencies and running every repository script.
+- Node.js 24 is only the Stream Deck plugin runtime compatibility target because
+  the Stream Deck desktop app hosts plugins in Node. It is not the repository
+  package manager or script runner.
+
+## Install and run
+
+Run all commands from the repository root:
+
+```sh
+bun install
+bun run dev
+```
+
+`bun run dev` starts both processes and stops both on Ctrl-C or SIGTERM:
+
+- Dashboard: http://127.0.0.1:4173
+- Status service: http://127.0.0.1:4317
+- WebSocket feed: ws://127.0.0.1:4317/ws
+
+To run one side only:
+
+```sh
+bun run dev:service
+bun run dev:dashboard
+```
+
+Set `PORT` or `HOST` to change the service listener. `CORS_ORIGINS` accepts a
+comma-separated allowlist; without it, browser origins on loopback hosts are
+allowed. Set `VITE_STATUS_SERVICE_URL` when the dashboard should connect to a
+service other than `http://127.0.0.1:4317`.
+
+## Service API and demo
+
+- `GET /health` returns service, provider, and snapshot-version status.
+- `GET /api/snapshot` returns the current validated dashboard snapshot.
+- `GET /ws` upgrades to the WebSocket feed and immediately sends a snapshot.
+- `POST /api/demo/advance` moves the live demo agent through waiting, running,
+  completed, failed, and retry states.
+- `POST /api/demo/reset` restores the seeded demo snapshot.
+
+The dashboard header has **Advance** and **Reset** controls for those demo
+routes. Pressing a visible Stream Deck Agent Slot also advances the demo.
+
+## Verify and build
+
+```sh
+bun run test
+bun run typecheck
+bun run build
+```
+
+The dashboard production output is written to `apps/dashboard/dist`. Serve it
+locally after building with:
+
+```sh
+bun run preview:dashboard
+```
+
+## Stream Deck workflow
+
+The plugin defaults to `ws://127.0.0.1:4317/ws` and accepts only loopback
+`ws://` or `wss://` endpoints from global plugin settings.
+
+Build and validate the plugin bundle:
+
+```sh
+bun run --filter '@status-dashboard/stream-deck' build
+bun run stream-deck:validate
+```
+
+With the Stream Deck desktop app installed, link and restart the plugin:
+
+```sh
+bun run stream-deck:link
+bun run stream-deck:restart
+```
+
+After linking, rebuild and restart on source changes with:
+
+```sh
+bun run --filter '@status-dashboard/stream-deck' dev
+```
+
+Create an installable plugin bundle with:
+
+```sh
+bun run --filter '@status-dashboard/stream-deck' pack
+```
+
+CLI validation can run without hardware. Live plugin and key behavior testing
+requires the Stream Deck desktop app and hardware (or an app-supported virtual
+device). Enable developer mode with `bunx @elgato/cli dev` before linking a
+development plugin for the first time.

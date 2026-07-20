@@ -1,0 +1,52 @@
+{
+  "$schema": "https://schemas.elgato.com/streamdeck/plugins/manifest.json",
+  "Name": "Status Dashboard",
+  "Version": "0.1.0.0",
+  "Author": "Status Dashboard",
+  "Actions": [
+    {
+      "Name": "Agent Slot",
+      "UUID": "com.status-dashboard.stream-deck.agent-slot",
+      "Icon": "imgs/actions/agent-slot/icon",
+      "Tooltip": "Shows one stable agent slot from the local status dashboard.",
+      "Controllers": [
+        "Keypad"
+      ],
+      "DisableAutomaticStates": true,
+      "DisableCaching": true,
+      "SupportedInMultiActions": false,
+      "UserTitleEnabled": false,
+      "States": [
+        {
+          "Image": "imgs/actions/agent-slot/key",
+          "ShowTitle": false,
+          "TitleAlignment": "middle"
+        }
+      ]
+    }
+  ],
+  "Category": "Status Dashboard",
+  "CategoryIcon": "imgs/plugin/category-icon",
+  "CodePath": "bin/plugin.js",
+  "Description": "Displays local coding-agent status across a stable pool of Stream Deck keys.",
+  "Icon": "imgs/plugin/marketplace",
+  "SDKVersion": 3,
+  "Software": {
+    "MinimumVersion": "7.1"
+  },
+  "OS": [
+    {
+      "Platform": "mac",
+      "MinimumVersion": "12"
+    },
+    {
+      "Platform": "windows",
+      "MinimumVersion": "10"
+    }
+  ],
+  "Nodejs": {
+    "Version": "24",
+    "Debug": "enabled"
+  },
+  "UUID": "com.status-dashboard.stream-deck"
+}
