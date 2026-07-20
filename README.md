@@ -10,9 +10,8 @@ scope, and long-term architecture.
 
 - `packages/model` defines the Zod-validated snapshot, update, reset, provider,
   resource, and event contracts shared over HTTP and WebSocket.
-- `apps/service` is a Bun HTTP/WebSocket service. Its simulated provider seeds
-  representative running, waiting, completed, and failed agents and exposes
-  deterministic demo transitions.
+- `apps/service` is a Bun HTTP/WebSocket service. It can use either the
+  deterministic demo provider or a live Herdr socket provider.
 - `apps/dashboard` is a React/Vite client. It loads an initial snapshot, applies
   sequential WebSocket updates, and refetches after reset or a version gap.
 - `apps/stream-deck` is an Elgato SDK plugin. Visible Agent Slot actions form a
@@ -55,6 +54,24 @@ comma-separated allowlist; without it, browser origins on loopback hosts are
 allowed. Set `VITE_STATUS_SERVICE_URL` when the dashboard should connect to a
 service other than `http://127.0.0.1:4317`.
 
+The demo provider remains the default. To read live agents from the default
+Herdr session:
+
+```sh
+STATUS_PROVIDER=herdr bun run dev
+```
+
+The provider follows Herdr's socket selection environment variables:
+`HERDR_SOCKET_PATH` overrides the path directly, while `HERDR_SESSION` selects
+a named session below the Herdr config directory. It validates Herdr's
+newline-delimited JSON, bootstraps from `session.snapshot`, subscribes to
+lifecycle and agent-status events, reconnects after failures, and normalizes
+Herdr agent states without exposing provider-specific concepts to consumers.
+
+Herdr's upstream repository can be cloned into the ignored `vendor/herdr`
+directory when its implementation or generated protocol schema is useful as a
+local reference.
+
 ## Service API and demo
 
 - `GET /health` returns service, provider, and snapshot-version status.
@@ -64,8 +81,10 @@ service other than `http://127.0.0.1:4317`.
   completed, failed, and retry states.
 - `POST /api/demo/reset` restores the seeded demo snapshot.
 
-The dashboard header has **Advance** and **Reset** controls for those demo
-routes. Pressing a visible Stream Deck Agent Slot also advances the demo.
+The dashboard header has **Advance** and **Reset** controls for those routes
+when the demo provider is active. With the Herdr provider selected, demo
+requests return `409`. Pressing a visible Stream Deck Agent Slot still invokes
+the demo route, so live Herdr keys currently act as status displays only.
 
 ## Verify and build
 

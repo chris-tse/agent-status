@@ -7,8 +7,13 @@ import type {
   StatusEventSeverity,
 } from "@status-dashboard/model";
 
-import type { ProviderAdvance, StatusProvider } from "./provider.js";
-import type { DashboardState } from "./store.js";
+import type {
+  DemoStatusProvider,
+  ProviderAdvance,
+  ProviderConnection,
+  ProviderListener,
+} from "./provider.js";
+import type { Clock, DashboardState } from "./store.js";
 
 const PROVIDER_ID = "demo";
 const LIVE_AGENT_ID = "demo-agent-live";
@@ -67,10 +72,20 @@ function shifted(now: Date, milliseconds: number): string {
   return new Date(now.getTime() + milliseconds).toISOString();
 }
 
-export class SimulatedStatusProvider implements StatusProvider {
+export class SimulatedStatusProvider implements DemoStatusProvider {
   readonly id = PROVIDER_ID;
+  readonly #clock: Clock;
   #step = 0;
   #eventSequence = 0;
+
+  constructor(clock: Clock = () => new Date()) {
+    this.#clock = clock;
+  }
+
+  open(listener: ProviderListener): ProviderConnection {
+    listener({ type: "replace", state: this.reset(this.#clock()) });
+    return { close() {} };
+  }
 
   reset(now: Date): DashboardState {
     this.#step = 0;

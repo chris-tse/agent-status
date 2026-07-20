@@ -15,7 +15,8 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@status-dashboard/model": "workspace:*"
+    "@status-dashboard/model": "workspace:*",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/bun": "latest",

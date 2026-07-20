@@ -3,8 +3,16 @@ import { createStatusServer } from "./server.js";
 export { SubscriptionBroadcaster } from "./broadcast.js";
 export { loadConfig, isOriginAllowed } from "./config.js";
 export { DemoController } from "./demo-controller.js";
+export {
+  HerdrStatusProvider,
+  type HerdrStatusProviderOptions,
+} from "./herdr-provider.js";
 export type {
+  DemoStatusProvider,
   ProviderAdvance,
+  ProviderConnection,
+  ProviderListener,
+  ProviderMessage,
   StatusProvider,
 } from "./provider.js";
 export {

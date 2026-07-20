@@ -1,6 +1,6 @@
 import type { DashboardSnapshot } from "@status-dashboard/model";
 
-import type { StatusProvider } from "./provider.js";
+import type { DemoStatusProvider } from "./provider.js";
 import { type Clock, DashboardStore } from "./store.js";
 
 export interface DemoAdvanceResult {
@@ -10,12 +10,12 @@ export interface DemoAdvanceResult {
 
 export class DemoController {
   readonly #store: DashboardStore;
-  readonly #provider: StatusProvider;
+  readonly #provider: DemoStatusProvider;
   readonly #clock: Clock;
 
   constructor(
     store: DashboardStore,
-    provider: StatusProvider,
+    provider: DemoStatusProvider,
     clock: Clock = () => new Date(),
   ) {
     this.#store = store;

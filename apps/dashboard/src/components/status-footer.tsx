@@ -1,8 +1,8 @@
 import type { ProviderStatus } from "@status-dashboard/model";
 
 import type { StatusCounts } from "../lib/selectors";
-import type { ViewMode } from "../lib/viewMode";
-import type { FeedPhase } from "../useDashboardFeed";
+import type { ViewMode } from "../lib/view-mode";
+import type { FeedPhase } from "../use-dashboard-feed";
 
 const phaseLabels: Record<FeedPhase, string> = {
   live: "live",

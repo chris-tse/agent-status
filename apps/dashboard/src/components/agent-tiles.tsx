@@ -1,7 +1,7 @@
 import type { StatefulResource } from "@status-dashboard/model";
 
 import { displayStatus } from "../lib/selectors";
-import type { AgentHoverHandlers } from "./HoverCard";
+import type { AgentHoverHandlers } from "./hover-card";
 
 interface AgentTilesProps {
   agents: StatefulResource[];

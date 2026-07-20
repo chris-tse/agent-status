@@ -1,0 +1,79 @@
+{
+  "id": "snapshot_fixture",
+  "result": {
+    "type": "session_snapshot",
+    "snapshot": {
+      "version": "0.7.3",
+      "protocol": 16,
+      "focused_workspace_id": "w1",
+      "focused_tab_id": "w1:t1",
+      "focused_pane_id": "w1:p1",
+      "workspaces": [
+        {
+          "workspace_id": "w1",
+          "number": 1,
+          "label": "status-dashboard",
+          "focused": true,
+          "pane_count": 4,
+          "tab_count": 1,
+          "active_tab_id": "w1:t1",
+          "agent_status": "blocked"
+        }
+      ],
+      "tabs": [],
+      "panes": [],
+      "layouts": [],
+      "agents": [
+        {
+          "terminal_id": "terminal-working",
+          "name": "builder",
+          "agent": "cursor",
+          "title": "Build provider",
+          "agent_status": "working",
+          "workspace_id": "w1",
+          "tab_id": "w1:t1",
+          "pane_id": "w1:p1",
+          "focused": true,
+          "state_change_seq": 10,
+          "revision": 4
+        },
+        {
+          "terminal_id": "terminal-blocked",
+          "agent": "claude",
+          "title": "Review contract",
+          "agent_status": "blocked",
+          "workspace_id": "w1",
+          "tab_id": "w1:t1",
+          "pane_id": "w1:p2",
+          "focused": false,
+          "state_change_seq": 11,
+          "revision": 5
+        },
+        {
+          "terminal_id": "terminal-done",
+          "agent": "codex",
+          "title": "Run tests",
+          "agent_status": "done",
+          "workspace_id": "w1",
+          "tab_id": "w1:t1",
+          "pane_id": "w1:p3",
+          "focused": false,
+          "state_change_seq": 12,
+          "revision": 6
+        },
+        {
+          "terminal_id": "terminal-idle",
+          "agent": "pi",
+          "title": "Plan follow-up",
+          "agent_status": "idle",
+          "workspace_id": "w1",
+          "tab_id": "w1:t1",
+          "pane_id": "w1:p4",
+          "focused": false,
+          "state_change_seq": 13,
+          "revision": 7
+        }
+      ]
+    }
+  }
+}

@@ -2,8 +2,8 @@ import { DashboardSnapshotSchema } from "@status-dashboard/model";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { DashboardView } from "../src/App";
-import { VIEW_MODE_STORAGE_KEY } from "../src/lib/viewMode";
+import { DashboardView } from "../src/app";
+import { VIEW_MODE_STORAGE_KEY } from "../src/lib/view-mode";
 
 const fixedNow = Date.parse("2026-07-19T07:05:00.000Z");
 

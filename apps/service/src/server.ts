@@ -11,7 +11,12 @@ import {
   type ServiceConfig,
 } from "./config.js";
 import { DemoController } from "./demo-controller.js";
-import type { StatusProvider } from "./provider.js";
+import { HerdrStatusProvider } from "./herdr-provider.js";
+import {
+  isDemoStatusProvider,
+  type ProviderMessage,
+  type StatusProvider,
+} from "./provider.js";
 import { SimulatedStatusProvider } from "./simulated-provider.js";
 import { type Clock, DashboardStore } from "./store.js";
 
@@ -28,7 +33,7 @@ export interface StatusServerOptions {
 export interface RunningStatusServer {
   readonly server: Server<ConnectionData>;
   readonly store: DashboardStore;
-  readonly demo: DemoController;
+  readonly demo: DemoController | undefined;
   stop(): void;
 }
 
@@ -59,6 +64,14 @@ function wireJson(message: DashboardWireMessage): string {
   return JSON.stringify(message);
 }
 
+function applyProviderMessage(
+  store: DashboardStore,
+  message: ProviderMessage,
+): void {
+  if (message.type === "replace") store.replace(message.state);
+  else store.apply(message.changes);
+}
+
 export function createStatusServer(
   options: StatusServerOptions = {},
 ): RunningStatusServer {
@@ -66,9 +79,20 @@ export function createStatusServer(
   const clock = options.clock ?? (() => new Date());
   const broadcaster = new SubscriptionBroadcaster();
   const store = new DashboardStore(broadcaster, clock);
-  const provider = options.provider ?? new SimulatedStatusProvider();
-  const demo = new DemoController(store, provider, clock);
-  demo.reset();
+  const provider =
+    options.provider ??
+    (config.provider === "herdr"
+      ? new HerdrStatusProvider({
+          socketPath: config.herdrSocketPath,
+          clock,
+        })
+      : new SimulatedStatusProvider(clock));
+  const demo = isDemoStatusProvider(provider)
+    ? new DemoController(store, provider, clock)
+    : undefined;
+  const providerConnection = provider.open((message) => {
+    applyProviderMessage(store, message);
+  });
 
   const connections = new Set<ServerWebSocket<ConnectionData>>();
   const unsubscribe = broadcaster.subscribe((message) => {
@@ -129,12 +153,18 @@ export function createStatusServer(
           request.method === "POST" &&
           url.pathname === "/api/demo/advance"
         ) {
+          if (demo === undefined) {
+            return json({ error: "Demo provider is not active" }, 409, origin);
+          }
           return json(demo.advance(), 200, origin);
         }
         if (
           request.method === "POST" &&
           url.pathname === "/api/demo/reset"
         ) {
+          if (demo === undefined) {
+            return json({ error: "Demo provider is not active" }, 409, origin);
+          }
           return json({ snapshot: demo.reset() }, 200, origin);
         }
       } catch (error) {
@@ -171,6 +201,7 @@ export function createStatusServer(
     store,
     demo,
     stop() {
+      providerConnection.close();
       clearInterval(pruneTimer);
       unsubscribe();
       for (const connection of connections) connection.close();

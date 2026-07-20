@@ -2,6 +2,8 @@ export interface ServiceConfig {
   host: string;
   port: number;
   allowedOrigins: ReadonlySet<string> | "local";
+  provider: "demo" | "herdr";
+  herdrSocketPath: string;
 }
 
 function parsePort(value: string | undefined): number {
@@ -12,6 +14,50 @@ function parsePort(value: string | undefined): number {
     throw new Error(`PORT must be an integer from 1 to 65535; received ${value}`);
   }
   return port;
+}
+
+function parseProvider(value: string | undefined): ServiceConfig["provider"] {
+  const provider = value?.trim() || "demo";
+  if (provider !== "demo" && provider !== "herdr") {
+    throw new Error(
+      `STATUS_PROVIDER must be "demo" or "herdr"; received ${provider}`,
+    );
+  }
+  return provider;
+}
+
+function resolveHerdrSocketPath(
+  environment: Record<string, string | undefined>,
+): string {
+  const explicit = environment.HERDR_SOCKET_PATH?.trim();
+  if (explicit) return explicit;
+
+  const configHome =
+    environment.XDG_CONFIG_HOME?.trim() ||
+    (environment.HOME?.trim()
+      ? `${environment.HOME.trim()}/.config`
+      : undefined);
+  if (configHome === undefined) return "/tmp/herdr.sock";
+
+  const session = environment.HERDR_SESSION?.trim();
+  if (
+    session === undefined ||
+    session.length === 0 ||
+    session === "default"
+  ) {
+    return `${configHome}/herdr/herdr.sock`;
+  }
+  if (
+    session.length > 64 ||
+    session === "." ||
+    session === ".." ||
+    !/^[a-zA-Z0-9._-]+$/.test(session)
+  ) {
+    throw new Error(
+      "HERDR_SESSION may contain only letters, numbers, dots, underscores, and hyphens",
+    );
+  }
+  return `${configHome}/herdr/sessions/${session}/herdr.sock`;
 }
 
 export function loadConfig(
@@ -26,6 +72,8 @@ export function loadConfig(
     port: parsePort(environment.PORT),
     allowedOrigins:
       origins === undefined ? "local" : new Set<string>(origins),
+    provider: parseProvider(environment.STATUS_PROVIDER),
+    herdrSocketPath: resolveHerdrSocketPath(environment),
   };
 }
 

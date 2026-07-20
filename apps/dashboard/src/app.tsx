@@ -1,20 +1,20 @@
 import { useCallback } from "react";
 
-import { AgentRows } from "./components/AgentRows";
-import { AgentTiles } from "./components/AgentTiles";
-import { HoverCard, useAgentHover } from "./components/HoverCard";
-import { StatusFooter } from "./components/StatusFooter";
+import { AgentRows } from "./components/agent-rows";
+import { AgentTiles } from "./components/agent-tiles";
+import { HoverCard, useAgentHover } from "./components/hover-card";
+import { StatusFooter } from "./components/status-footer";
 import {
   countByStatus,
   orderedAgents,
   troubledProviders,
 } from "./lib/selectors";
 import { useNow } from "./lib/time";
-import { useViewMode } from "./lib/viewMode";
+import { useViewMode } from "./lib/view-mode";
 import {
   useDashboardFeed,
   type DashboardFeed,
-} from "./useDashboardFeed";
+} from "./use-dashboard-feed";
 
 type DashboardViewProps = DashboardFeed & {
   now?: number;

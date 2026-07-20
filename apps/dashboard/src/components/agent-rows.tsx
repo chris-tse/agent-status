@@ -2,7 +2,7 @@ import type { StatefulResource } from "@status-dashboard/model";
 
 import { displayStatus } from "../lib/selectors";
 import { formatDuration } from "../lib/time";
-import type { AgentHoverHandlers } from "./HoverCard";
+import type { AgentHoverHandlers } from "./hover-card";
 
 interface AgentRowsProps {
   agents: StatefulResource[];
