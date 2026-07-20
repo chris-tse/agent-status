@@ -14,8 +14,8 @@ slot pool:
 
 - Selected Agent Slot keys are ordered left to right, then top to bottom; keys
   assigned to other actions do not affect that order.
-- An assigned resource remains on its key until the service removes it or that
-  key is no longer visible.
+- Once the visible Agent Slot layout is stable, an assigned resource remains on
+  its key until the service removes it or that key is no longer visible.
 - Vacancies select waiting/failed agents first, then running agents, then the
   most recently completed agents.
 - Status changes update color and text without moving an existing assignment.

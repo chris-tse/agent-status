@@ -50,8 +50,9 @@ function compareSlots(
 }
 
 /**
- * Coordinates visible Agent Slot action instances. Existing assignments are
- * intentionally sticky; priority is consulted only when filling a vacancy.
+ * Coordinates visible Agent Slot action instances. Assignments are spatially
+ * ordered when slots appear, then remain sticky while the layout is stable.
+ * Priority is consulted only when filling a vacancy.
  */
 export class SlotPool {
   readonly #slots = new Map<string, Slot>();
