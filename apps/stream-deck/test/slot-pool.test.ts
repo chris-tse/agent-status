@@ -23,6 +23,26 @@ function agent(
 }
 
 describe("SlotPool", () => {
+  it("assigns selected keys left to right, then top to bottom", () => {
+    const pool = new SlotPool();
+    const resources = [
+      agent("finished", "completed"),
+      agent("active", "running"),
+      agent("blocked", "waiting"),
+    ];
+
+    pool.register("bottom-right", { deviceId: "deck", row: 2, column: 4 });
+    pool.reconcile(resources);
+    pool.register("top-right", { deviceId: "deck", row: 0, column: 4 });
+    pool.reconcile(resources);
+    pool.register("top-left", { deviceId: "deck", row: 0, column: 0 });
+    pool.reconcile(resources);
+
+    expect(pool.assignmentFor("top-left")).toBe("blocked");
+    expect(pool.assignmentFor("top-right")).toBe("active");
+    expect(pool.assignmentFor("bottom-right")).toBe("finished");
+  });
+
   it("fills vacant slots by attention, running, then completed priority", () => {
     const pool = new SlotPool();
     pool.register("slot-1");

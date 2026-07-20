@@ -12,6 +12,8 @@ Action UUID: `com.status-dashboard.stream-deck.agent-slot`
 Place Agent Slot on as many keypad keys as desired. Visible instances form one
 slot pool:
 
+- Selected Agent Slot keys are ordered left to right, then top to bottom; keys
+  assigned to other actions do not affect that order.
 - An assigned resource remains on its key until the service removes it or that
   key is no longer visible.
 - Vacancies select waiting/failed agents first, then running agents, then the

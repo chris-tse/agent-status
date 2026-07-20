@@ -41,7 +41,17 @@ export class AgentSlotAction extends SingletonAction {
     }
 
     this.#visibleActions.set(event.action.id, event.action);
-    this.#pool.register(event.action.id);
+    const { coordinates } = event.action;
+    this.#pool.register(
+      event.action.id,
+      coordinates === undefined
+        ? undefined
+        : {
+            deviceId: event.action.device.id,
+            row: coordinates.row,
+            column: coordinates.column,
+          },
+    );
     this.#pool.reconcile(this.#snapshot.resources);
     this.renderAll();
   }
