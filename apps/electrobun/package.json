@@ -1,0 +1,30 @@
+{
+  "name": "@status-dashboard/electrobun",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "bun run build:release",
+    "build:dashboard": "VITE_STATUS_SERVICE_URL=http://127.0.0.1:4317 bun run --filter '@status-dashboard/dashboard' build",
+    "build:dev": "bun run build:dependencies && bun run build:dashboard && electrobun build --env=dev",
+    "build:release": "bun run build:dependencies && bun run build:dashboard && electrobun build --env=stable",
+    "build:dependencies": "bun run --filter '@status-dashboard/model' build && bun run --filter '@status-dashboard/service' build",
+    "dev": "bun run build:dependencies && bun run build:dashboard && electrobun dev --watch",
+    "dev:reload": "bun run build:dashboard && electrobun build --env=dev",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@status-dashboard/service": "workspace:*",
+    "electrobun": "1.18.1"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "5.9.3",
+    "vitest": "latest"
+  },
+  "engines": {
+    "bun": "1.3.14"
+  },
+  "packageManager": "bun@1.3.14"
+}

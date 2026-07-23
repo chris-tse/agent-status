@@ -53,13 +53,20 @@ async function writeFakeTop(directory: string): Promise<void> {
   await writeFile(
     executable,
     `#!/bin/sh
+printf '%s\\n' "$*" >> "$TOP_ARGUMENT_LOG"
+resident_101=100K
+resident_202=200K
+if [ "$2" = d ]; then
+  resident_101=-16K
+  resident_202=-32K
+fi
 printf '%s\\n' \
   'PID %CPU MEM IDLEW' \
-  '101 0.0 100K 0' \
-  '202 0.0 200K 0' \
+  "101 0.0 $resident_101 0" \
+  "202 0.0 $resident_202 0" \
   'PID %CPU MEM IDLEW' \
-  '101 1.5 100K 2' \
-  '202 2.5 200K 3' \
+  "101 1.5 $resident_101 2" \
+  "202 2.5 $resident_202 3" \
   'PID %CPU MEM IDLEW' \
   '101 3.5 120K 4' \
   '202 4.5 220K 5'
@@ -130,6 +137,7 @@ describe("release measurement CLI", () => {
     // Login-profile startup must not contaminate each timed protocol command.
     await writeFile(path.join(directory, ".zprofile"), "sleep 0.5\n");
     const commandLog = path.join(directory, "commands.log");
+    const topArgumentLog = path.join(directory, "top-arguments.log");
     const configPath = await createConfig(directory, "electrobun", commandLog);
     const outputPath = path.join(directory, "results", "electrobun.json");
     const comparisonPath = path.join(directory, "comparison.md");
@@ -139,6 +147,7 @@ describe("release measurement CLI", () => {
       {
         ...process.env,
         PATH: `${binDirectory}:${process.env.PATH ?? ""}`,
+        TOP_ARGUMENT_LOG: topArgumentLog,
         ZDOTDIR: directory,
       },
     );
@@ -191,6 +200,9 @@ describe("release measurement CLI", () => {
         "",
       ].join("\n"),
     );
+    const topArguments = await readFile(topArgumentLog, "utf8");
+    expect(topArguments.match(/-c d/g)).toHaveLength(2);
+    expect(topArguments.match(/-c n/g)).toHaveLength(2);
 
     const comparison = await readFile(comparisonPath, "utf8");
     expect(comparison).toContain("electrobun");

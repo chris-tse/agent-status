@@ -1,6 +1,7 @@
 node_modules/
 dist/
 coverage/
+apps/electrobun/.electrobun/
 vendor/
 *.tsbuildinfo
 .DS_Store
@@ -8,3 +9,4 @@ vendor/
 .env.*
 !.env.example
 !packages/model/tsconfig.json
+!apps/electrobun/tsconfig.json

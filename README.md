@@ -88,6 +88,23 @@ idle CPU and wakeups, startup and reconnect latency, and developer build/reload
 time. See [the release measurement protocol](docs/measurements/protocol.md) for
 the required runtime adapter commands and sampling rules.
 
+## Electrobun runtime spike
+
+The production-shaped Electrobun spike packages the real React dashboard and
+Bun status service into a native macOS application. It uses Herdr by default
+and provides dashboard and service lifecycle controls in both the menu bar and
+application menu.
+
+```sh
+bun run --filter '@status-dashboard/electrobun' dev
+bun run --filter '@status-dashboard/electrobun' build:release
+bun run measure:release --config docs/measurements/configs/electrobun.json
+```
+
+See [the Electrobun spike findings](docs/spikes/electrobun.md) for Close and
+Quit semantics, the measured stable build, packaging workflow, and known
+limitations.
+
 The demo provider remains the default. To read live agents from the default
 Herdr session:
 

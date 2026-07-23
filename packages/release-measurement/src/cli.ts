@@ -309,14 +309,15 @@ function parseCounter(value: string, field: string): number {
   return parsed;
 }
 
-function parseTopSamples(
+type TopProcessSample = { cpu: number; resident: number; wakeups: number };
+
+function parseTopOutput(
   output: string,
   expectedProcessIds: readonly number[],
-  sampleCount: number,
-  intervalSeconds: number,
-): IdleMeasurement {
-  const samples: Array<Map<number, { cpu: number; resident: number; wakeups: number }>> = [];
-  let current: Map<number, { cpu: number; resident: number; wakeups: number }> | undefined;
+  parseResident: boolean,
+): Array<Map<number, TopProcessSample>> {
+  const samples: Array<Map<number, TopProcessSample>> = [];
+  let current: Map<number, TopProcessSample> | undefined;
 
   for (const rawLine of output.split(/\r?\n/)) {
     const line = rawLine.trim();
@@ -332,34 +333,64 @@ function parseTopSamples(
     if (!expectedProcessIds.includes(pid)) continue;
     current.set(pid, {
       cpu: parseCounter(columns[1] ?? "", "CPU"),
-      resident: parseBytes(columns[2] ?? ""),
+      resident: parseResident ? parseBytes(columns[2] ?? "") : 0,
       wakeups: parseCounter(columns[3] ?? "", "idle wakeup"),
     });
   }
+  return samples;
+}
 
-  const usableSamples = samples.slice(1);
-  if (usableSamples.length !== sampleCount) {
-    throw new Error(`top returned ${usableSamples.length} usable samples; expected ${sampleCount}`);
+function usableTopSamples(
+  samples: Array<Map<number, TopProcessSample>>,
+  expectedProcessIds: readonly number[],
+  sampleCount: number,
+  mode: "delta" | "current",
+): Array<Map<number, TopProcessSample>> {
+  const usable = samples.slice(1);
+  if (usable.length !== sampleCount) {
+    throw new Error(
+      `top ${mode} mode returned ${usable.length} usable samples; expected ${sampleCount}`,
+    );
   }
-  for (const [index, sample] of usableSamples.entries()) {
+  for (const [index, sample] of usable.entries()) {
     const missing = expectedProcessIds.filter((pid) => !sample.has(pid));
     if (missing.length > 0) {
       throw new Error(
-        `top sample ${index + 1} omitted configured process IDs: ${missing.join(", ")}`,
+        `top ${mode} sample ${index + 1} omitted configured process IDs: ${missing.join(", ")}`,
       );
     }
   }
+  return usable;
+}
 
-  const totals = usableSamples.map((sample) =>
-    [...sample.values()].reduce(
-      (sum, process) => ({
-        cpu: sum.cpu + process.cpu,
-        resident: sum.resident + process.resident,
-        wakeups: sum.wakeups + process.wakeups,
-      }),
-      { cpu: 0, resident: 0, wakeups: 0 },
-    ),
+function parseTopSamples(
+  deltaOutput: string,
+  currentOutput: string,
+  expectedProcessIds: readonly number[],
+  sampleCount: number,
+  intervalSeconds: number,
+): IdleMeasurement {
+  const deltaSamples = usableTopSamples(
+    parseTopOutput(deltaOutput, expectedProcessIds, false),
+    expectedProcessIds,
+    sampleCount,
+    "delta",
   );
+  const currentSamples = usableTopSamples(
+    parseTopOutput(currentOutput, expectedProcessIds, true),
+    expectedProcessIds,
+    sampleCount,
+    "current",
+  );
+
+  const totals = deltaSamples.map((sample, index) => {
+    const current = currentSamples[index]!;
+    return {
+      cpu: [...sample.values()].reduce((sum, process) => sum + process.cpu, 0),
+      resident: [...current.values()].reduce((sum, process) => sum + process.resident, 0),
+      wakeups: [...sample.values()].reduce((sum, process) => sum + process.wakeups, 0),
+    };
+  });
   return {
     residentMemoryBytes: Math.round(
       totals.reduce((sum, sample) => sum + sample.resident, 0) / sampleCount,
@@ -377,20 +408,22 @@ function parseTopSamples(
 async function measureIdle(config: MeasurementConfig): Promise<IdleMeasurement> {
   await settle(config.sampling.settleSeconds);
   const ids = await processIds(config);
-  const topArguments = [
+  const commonArguments = [
     "-l",
     String(config.sampling.sampleCount + 1),
     "-s",
     String(config.sampling.intervalSeconds),
-    "-c",
-    "d",
     ...ids.flatMap((id) => ["-pid", String(id)]),
     "-stats",
     "pid,cpu,rsize,idlew",
   ];
-  const result = await run("top", topArguments, config.workingDirectory);
+  const [deltaResult, currentResult] = await Promise.all([
+    run("top", ["-c", "d", ...commonArguments], config.workingDirectory),
+    run("top", ["-c", "n", ...commonArguments], config.workingDirectory),
+  ]);
   return parseTopSamples(
-    result.stdout,
+    deltaResult.stdout,
+    currentResult.stdout,
     ids,
     config.sampling.sampleCount,
     config.sampling.intervalSeconds,
