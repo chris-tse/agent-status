@@ -74,6 +74,20 @@ comma-separated allowlist; without it, browser origins on loopback hosts are
 allowed. Set `VITE_STATUS_SERVICE_URL` when the dashboard should connect to a
 service other than `http://127.0.0.1:4317`.
 
+## Release measurements
+
+Measure every production desktop runtime with the same macOS protocol:
+
+```sh
+bun run measure:release --config docs/measurements/configs/<runtime>.json
+```
+
+The command records a versioned JSON result and regenerates a side-by-side
+comparison covering compressed and installed size, open/closed resident memory,
+idle CPU and wakeups, startup and reconnect latency, and developer build/reload
+time. See [the release measurement protocol](docs/measurements/protocol.md) for
+the required runtime adapter commands and sampling rules.
+
 The demo provider remains the default. To read live agents from the default
 Herdr session:
 

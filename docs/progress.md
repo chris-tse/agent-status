@@ -156,3 +156,48 @@
     login.
 
 ---
+
+## 2026-07-23 01:29 CDT - #4
+
+- Added one `bun run measure:release --config <path>` command that drives a
+  runtime-specific release through developer build/reload, startup, dashboard
+  open/close, reconnect, and cleanup operations.
+- Recorded compressed distribution and installed sizes separately; sampled
+  aggregate resident memory, CPU, and idle wakeups for all product processes
+  with the dashboard open and closed; and timed startup, reconnect, developer
+  build, and developer reload independently.
+- Added versioned JSON result records with host, repository, configuration hash,
+  process-set, sampling, unit, and timing context, plus a generated Markdown
+  table for side-by-side runtime comparison.
+- Added public CLI coverage that executes the protocol across real subprocess
+  and filesystem boundaries with macOS telemetry replaced only at the external
+  `top` boundary, including rejection of incomplete protocols.
+- Files changed:
+  - `packages/release-measurement/src/cli.ts` — public measurement command,
+    validation, macOS sampling, result writer, and comparison generator.
+  - `packages/release-measurement/test/cli.test.ts` — CLI behavior and
+    no-substitution coverage.
+  - `packages/release-measurement/package.json`,
+    `packages/release-measurement/tsconfig.json`, `package.json`, `bun.lock` —
+    workspace and root command wiring.
+  - `docs/measurements/protocol.md`,
+    `docs/measurements/config.example.json`,
+    `docs/measurements/comparison.md`, `docs/measurements/results/.gitkeep` —
+    repeatable protocol, adapter template, and in-repo result format.
+  - `README.md`, `docs/progress.md` — user-facing command and implementation
+    record.
+- **Learnings for future iterations:**
+  - **Patterns discovered:** A small command adapter per runtime keeps native
+    lifecycle details at the boundary while the runner applies identical
+    measurement order, units, aggregation, metadata, and output schema.
+  - **Gotcha:** macOS `top` reports an invalid first CPU sample. Use delta mode,
+    request `pid,cpu,rsize,idlew`, discard the first sample, and aggregate every
+    PID belonging to the product so renderer overhead remains visible. Protocol
+    commands use non-login shells; repeatedly loading a user `.zprofile` adds
+    variable seconds to both tests and the timings being measured.
+  - **Useful context:** `top`'s `IDLEW` delta is available without elevated
+    privileges; its composite `POWER` score is not an acceptable substitute for
+    wakeups. `du -sk` and compressed-file byte length likewise remain distinct
+    installed and distribution size measures.
+
+---
