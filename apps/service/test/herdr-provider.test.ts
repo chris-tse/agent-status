@@ -30,10 +30,7 @@ afterEach(async () => {
   await Promise.all(cleanup.splice(0).map((dispose) => dispose()));
 });
 
-async function waitFor<T>(
-  read: () => T | undefined,
-  timeoutMs = 2_000,
-): Promise<T> {
+async function waitFor<T>(read: () => T | undefined, timeoutMs = 2_000): Promise<T> {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
     const value = read();
@@ -50,9 +47,7 @@ async function startFakeHerdr(): Promise<{
 }> {
   const directory = await mkdtemp(join(tmpdir(), "status-dashboard-herdr-"));
   const socketPath = join(directory, "herdr.sock");
-  const fixture = JSON.parse(
-    await readFile(FIXTURE_URL, "utf8"),
-  ) as FixtureResponse;
+  const fixture = JSON.parse(await readFile(FIXTURE_URL, "utf8")) as FixtureResponse;
   const subscriptions = new Set<Socket>();
   let server: Server;
 
@@ -76,11 +71,7 @@ async function startFakeHerdr(): Promise<{
         return;
       }
       if (request.method === "events.subscribe") {
-        if (
-          request.params?.subscriptions?.some(
-            ({ type }) => type === "pane.updated",
-          )
-        ) {
+        if (request.params?.subscriptions?.some(({ type }) => type === "pane.updated")) {
           socket.end(
             `${JSON.stringify({
               id: request.id,
@@ -144,9 +135,7 @@ describe("HerdrStatusProvider", () => {
     const connection = provider.open((message) => messages.push(message));
     cleanup.push(() => connection.close());
 
-    const replacement = await waitFor(() =>
-      messages.find((message) => message.type === "replace"),
-    );
+    const replacement = await waitFor(() => messages.find((message) => message.type === "replace"));
     if (replacement.type !== "replace") throw new Error("Expected replacement");
 
     expect(replacement.state.providers).toEqual([
@@ -201,9 +190,7 @@ describe("HerdrStatusProvider", () => {
     const connection = provider.open((message) => messages.push(message));
     cleanup.push(() => connection.close());
 
-    await waitFor(() =>
-      messages.find((message) => message.type === "replace"),
-    );
+    await waitFor(() => messages.find((message) => message.type === "replace"));
     herdr.setStatus("w1:p1", "blocked");
     herdr.publish({
       event: "pane.agent_status_changed",
@@ -220,8 +207,7 @@ describe("HerdrStatusProvider", () => {
         .flatMap((message) => message.changes)
         .find(
           (change): change is DashboardChange =>
-            change.type === "event.upsert" &&
-            change.event.type === "agent.waiting",
+            change.type === "event.upsert" && change.event.type === "agent.waiting",
         ),
     );
 
@@ -259,9 +245,7 @@ describe("HerdrStatusProvider", () => {
     const connection = provider.open((message) => messages.push(message));
     cleanup.push(() => connection.close());
 
-    await waitFor(() =>
-      messages.find((message) => message.type === "replace"),
-    );
+    await waitFor(() => messages.find((message) => message.type === "replace"));
     herdr.setStatus("w1:p1", "future_status");
     herdr.publish({
       event: "pane.agent_status_changed",
@@ -278,8 +262,7 @@ describe("HerdrStatusProvider", () => {
         .flatMap((message) => message.changes)
         .find(
           (change) =>
-            change.type === "provider.upsert" &&
-            change.provider.connectivity === "disconnected",
+            change.type === "provider.upsert" && change.provider.connectivity === "disconnected",
         ),
     );
 

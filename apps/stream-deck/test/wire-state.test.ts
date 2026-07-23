@@ -1,7 +1,4 @@
-import {
-  DashboardWireMessageSchema,
-  type AgentLifecycleStatus,
-} from "@status-dashboard/model";
+import { DashboardWireMessageSchema, type AgentLifecycleStatus } from "@status-dashboard/model";
 import { describe, expect, it } from "vitest";
 
 import { WireState, WireVersionError } from "../src/wire-state.js";

@@ -2,16 +2,16 @@
   "name": "status-dashboard",
   "version": "0.0.0",
   "private": true,
-  "type": "module",
-  "packageManager": "bun@1.3.14",
-  "engines": {
-    "bun": "1.3.14"
-  },
   "workspaces": [
     "packages/*",
     "apps/*"
   ],
+  "type": "module",
   "scripts": {
+    "prepare": "git config core.hooksPath .githooks",
+    "lint": "oxlint",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check",
     "dev": "bun scripts/dev.ts",
     "dev:service": "bun run --filter '@status-dashboard/service' dev",
     "dev:dashboard": "bun run --filter '@status-dashboard/dashboard' dev",
@@ -26,7 +26,13 @@
   },
   "devDependencies": {
     "@types/bun": "latest",
+    "oxfmt": "^0.60.0",
+    "oxlint": "^1.75.0",
     "typescript": "5.9.3",
     "vitest": "latest"
-  }
+  },
+  "engines": {
+    "bun": "1.3.14"
+  },
+  "packageManager": "bun@1.3.14"
 }

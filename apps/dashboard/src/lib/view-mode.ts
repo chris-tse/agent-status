@@ -6,9 +6,7 @@ export const VIEW_MODE_STORAGE_KEY = "dashboard.viewMode";
 
 function loadViewMode(): ViewMode {
   try {
-    return window.localStorage.getItem(VIEW_MODE_STORAGE_KEY) === "tiles"
-      ? "tiles"
-      : "rows";
+    return window.localStorage.getItem(VIEW_MODE_STORAGE_KEY) === "tiles" ? "tiles" : "rows";
   } catch {
     return "rows";
   }

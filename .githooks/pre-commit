@@ -1,0 +1,9 @@
+#!/bin/sh
+# Lint and format-check staged files with oxlint/oxfmt before every commit.
+set -e
+
+files=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '\.(ts|tsx|js|jsx|mjs|cjs|json|jsonc)$' || true)
+[ -z "$files" ] && exit 0
+
+echo "$files" | xargs node_modules/.bin/oxlint --no-error-on-unmatched-pattern
+echo "$files" | xargs node_modules/.bin/oxfmt --check --no-error-on-unmatched-pattern

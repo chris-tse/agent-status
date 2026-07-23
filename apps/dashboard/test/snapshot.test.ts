@@ -1,7 +1,4 @@
-import {
-  DashboardSnapshotSchema,
-  DashboardWireMessageSchema,
-} from "@status-dashboard/model";
+import { DashboardSnapshotSchema, DashboardWireMessageSchema } from "@status-dashboard/model";
 import { describe, expect, it } from "vitest";
 
 import { reduceWireMessage } from "../src/snapshot";

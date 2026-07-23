@@ -23,7 +23,6 @@ streamDeck.settings.onDidReceiveGlobalSettings<GlobalSettings>((event) => {
   client.setEndpoint(event.settings.endpoint);
 });
 
-const settings =
-  await streamDeck.settings.getGlobalSettings<GlobalSettings>();
+const settings = await streamDeck.settings.getGlobalSettings<GlobalSettings>();
 client.setEndpoint(settings.endpoint);
 client.start();

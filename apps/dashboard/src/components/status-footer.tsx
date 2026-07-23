@@ -72,9 +72,7 @@ export function StatusFooter({
         type="button"
         className="ghost view-toggle"
         onClick={onToggleView}
-        aria-label={
-          view === "rows" ? "Switch to dense tiles" : "Switch to rows"
-        }
+        aria-label={view === "rows" ? "Switch to dense tiles" : "Switch to rows"}
         title={view === "rows" ? "Switch to dense tiles" : "Switch to rows"}
       >
         <span aria-hidden="true">{view === "rows" ? "▦" : "☰"}</span>

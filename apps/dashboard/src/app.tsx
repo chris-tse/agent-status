@@ -4,17 +4,10 @@ import { AgentRows } from "./components/agent-rows";
 import { AgentTiles } from "./components/agent-tiles";
 import { HoverCard, useAgentHover } from "./components/hover-card";
 import { StatusFooter } from "./components/status-footer";
-import {
-  countByStatus,
-  orderedAgents,
-  troubledProviders,
-} from "./lib/selectors";
+import { countByStatus, orderedAgents, troubledProviders } from "./lib/selectors";
 import { useNow } from "./lib/time";
 import { useViewMode } from "./lib/view-mode";
-import {
-  useDashboardFeed,
-  type DashboardFeed,
-} from "./use-dashboard-feed";
+import { useDashboardFeed, type DashboardFeed } from "./use-dashboard-feed";
 
 type DashboardViewProps = DashboardFeed & {
   now?: number;
@@ -58,14 +51,8 @@ export function DashboardView({
   const [view, toggleView] = useViewMode();
   const { hover, handlers } = useAgentHover();
 
-  const advance = useCallback(
-    () => void runDemoAction("advance"),
-    [runDemoAction],
-  );
-  const reset = useCallback(
-    () => void runDemoAction("reset"),
-    [runDemoAction],
-  );
+  const advance = useCallback(() => void runDemoAction("advance"), [runDemoAction]);
+  const reset = useCallback(() => void runDemoAction("reset"), [runDemoAction]);
 
   if (snapshot === null) {
     return <LoadingState error={error} onRefresh={refresh} />;
@@ -78,14 +65,8 @@ export function DashboardView({
   return (
     <div className="shell">
       {isShowingStaleSnapshot && (
-        <div
-          className="connection-banner"
-          role={error !== null ? "alert" : "status"}
-        >
-          <span>
-            {error ?? "Live connection is unavailable"}. Showing the last valid
-            snapshot.
-          </span>
+        <div className="connection-banner" role={error !== null ? "alert" : "status"}>
+          <span>{error ?? "Live connection is unavailable"}. Showing the last valid snapshot.</span>
           <button type="button" onClick={() => void refresh()}>
             Retry
           </button>

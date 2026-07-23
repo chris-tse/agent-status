@@ -39,10 +39,7 @@ function providerLabel(providerId: string): string {
   return shortLabel(pieces.at(-1) ?? providerId, 11).toUpperCase();
 }
 
-export function renderKeyImage(
-  connection: ConnectionState,
-  resource?: AgentResource,
-): string {
+export function renderKeyImage(connection: ConnectionState, resource?: AgentResource): string {
   let background = "#172033";
   let top = "STATUS";
   let center = "EMPTY";

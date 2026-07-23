@@ -177,9 +177,7 @@ export class SimulatedStatusProvider implements DemoStatusProvider {
   }
 
   advance(snapshot: DashboardSnapshot, now: Date): ProviderAdvance {
-    const liveAgent = snapshot.resources.find(
-      (resource) => resource.id === LIVE_AGENT_ID,
-    );
+    const liveAgent = snapshot.resources.find((resource) => resource.id === LIVE_AGENT_ID);
     if (liveAgent === undefined) {
       throw new Error(`Demo resource ${LIVE_AGENT_ID} is missing`);
     }
@@ -221,25 +219,18 @@ export class SimulatedStatusProvider implements DemoStatusProvider {
     return { description: step.description, changes };
   }
 
-  #transitionAgent(
-    current: AgentResource,
-    step: DemoStep,
-    now: Date,
-  ): AgentResource {
+  #transitionAgent(current: AgentResource, step: DemoStep, now: Date): AgentResource {
     const common = {
       kind: "agent" as const,
       id: current.id,
       providerId: current.providerId,
-      ...(current.workspaceId === undefined
-        ? {}
-        : { workspaceId: current.workspaceId }),
+      ...(current.workspaceId === undefined ? {} : { workspaceId: current.workspaceId }),
       ...(current.label === undefined ? {} : { label: current.label }),
       status: step.status,
       createdAt: current.createdAt,
       updatedAt: now.toISOString(),
       startedAt:
-        step.status === "running" &&
-        (current.status === "completed" || current.status === "failed")
+        step.status === "running" && (current.status === "completed" || current.status === "failed")
           ? now.toISOString()
           : (current.startedAt ?? now.toISOString()),
     };
@@ -247,9 +238,7 @@ export class SimulatedStatusProvider implements DemoStatusProvider {
     if (step.status === "waiting") {
       return {
         ...common,
-        ...(step.attentionReason === undefined
-          ? {}
-          : { attentionReason: step.attentionReason }),
+        ...(step.attentionReason === undefined ? {} : { attentionReason: step.attentionReason }),
       };
     }
     if (step.status === "completed") {

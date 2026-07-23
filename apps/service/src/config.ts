@@ -19,32 +19,22 @@ function parsePort(value: string | undefined): number {
 function parseProvider(value: string | undefined): ServiceConfig["provider"] {
   const provider = value?.trim() || "demo";
   if (provider !== "demo" && provider !== "herdr") {
-    throw new Error(
-      `STATUS_PROVIDER must be "demo" or "herdr"; received ${provider}`,
-    );
+    throw new Error(`STATUS_PROVIDER must be "demo" or "herdr"; received ${provider}`);
   }
   return provider;
 }
 
-function resolveHerdrSocketPath(
-  environment: Record<string, string | undefined>,
-): string {
+function resolveHerdrSocketPath(environment: Record<string, string | undefined>): string {
   const explicit = environment.HERDR_SOCKET_PATH?.trim();
   if (explicit) return explicit;
 
   const configHome =
     environment.XDG_CONFIG_HOME?.trim() ||
-    (environment.HOME?.trim()
-      ? `${environment.HOME.trim()}/.config`
-      : undefined);
+    (environment.HOME?.trim() ? `${environment.HOME.trim()}/.config` : undefined);
   if (configHome === undefined) return "/tmp/herdr.sock";
 
   const session = environment.HERDR_SESSION?.trim();
-  if (
-    session === undefined ||
-    session.length === 0 ||
-    session === "default"
-  ) {
+  if (session === undefined || session.length === 0 || session === "default") {
     return `${configHome}/herdr/herdr.sock`;
   }
   if (
@@ -60,9 +50,7 @@ function resolveHerdrSocketPath(
   return `${configHome}/herdr/sessions/${session}/herdr.sock`;
 }
 
-export function loadConfig(
-  environment: Record<string, string | undefined>,
-): ServiceConfig {
+export function loadConfig(environment: Record<string, string | undefined>): ServiceConfig {
   const origins = environment.CORS_ORIGINS?.split(",")
     .map((origin) => origin.trim())
     .filter((origin) => origin.length > 0);
@@ -70,8 +58,7 @@ export function loadConfig(
   return {
     host: environment.HOST?.trim() || "127.0.0.1",
     port: parsePort(environment.PORT),
-    allowedOrigins:
-      origins === undefined ? "local" : new Set<string>(origins),
+    allowedOrigins: origins === undefined ? "local" : new Set<string>(origins),
     provider: parseProvider(environment.STATUS_PROVIDER),
     herdrSocketPath: resolveHerdrSocketPath(environment),
   };
@@ -88,9 +75,7 @@ export function isOriginAllowed(
     const url = new URL(origin);
     return (
       (url.protocol === "http:" || url.protocol === "https:") &&
-      (url.hostname === "localhost" ||
-        url.hostname === "127.0.0.1" ||
-        url.hostname === "::1")
+      (url.hostname === "localhost" || url.hostname === "127.0.0.1" || url.hostname === "::1")
     );
   } catch {
     return false;

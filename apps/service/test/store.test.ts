@@ -75,10 +75,7 @@ describe("DashboardStore", () => {
   });
 
   it("rejects invalid model writes without changing state", () => {
-    const store = new DashboardStore(
-      new SubscriptionBroadcaster(),
-      () => INITIAL_TIME,
-    );
+    const store = new DashboardStore(new SubscriptionBroadcaster(), () => INITIAL_TIME);
     store.apply(baseChanges());
 
     expect(() =>
@@ -97,9 +94,7 @@ describe("DashboardStore", () => {
       ]),
     ).toThrow();
     expect(store.version).toBe(1);
-    expect(store.snapshot().resources.map(({ id }) => id)).toEqual([
-      "agent-stable",
-    ]);
+    expect(store.snapshot().resources.map(({ id }) => id)).toEqual(["agent-stable"]);
   });
 
   it("prunes expired events and broadcasts their removal", () => {
@@ -126,18 +121,12 @@ describe("DashboardStore", () => {
       },
     ]);
 
-    const beforeExpiry = store.snapshot(
-      new Date("2026-07-19T07:00:59.999Z"),
-    );
+    const beforeExpiry = store.snapshot(new Date("2026-07-19T07:00:59.999Z"));
     expect(beforeExpiry.events).toHaveLength(1);
 
-    const afterExpiry = store.snapshot(
-      new Date("2026-07-19T07:01:00.000Z"),
-    );
+    const afterExpiry = store.snapshot(new Date("2026-07-19T07:01:00.000Z"));
     expect(afterExpiry.events).toHaveLength(0);
     expect(afterExpiry.version).toBe(2);
-    expect(messages[1]?.changes).toEqual([
-      { type: "event.remove", eventId: "event-expiring" },
-    ]);
+    expect(messages[1]?.changes).toEqual([{ type: "event.remove", eventId: "event-expiring" }]);
   });
 });

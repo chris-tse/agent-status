@@ -1,6 +1,7 @@
 # Implementation Progress
 
 ## 2026-07-22 23:50 CDT - #1 (Service endpoint identity in /health)
+
 - Added application identity (`service`) and `protocolVersion` to the `GET /health`
   response alongside its existing `status`, snapshot `version`, and `provider`
   fields, so a probe can distinguish three situations from the payload alone: a
@@ -47,9 +48,11 @@
     `bun run test` (full suite), `bun run --filter '@status-dashboard/service' test`
     (single package). Tests that bind sockets (e.g. the Herdr unix-socket test) may
     hit `EPERM` inside a restricted sandbox — run them without sandbox restrictions.
+
 ---
 
 ## 2026-07-23 00:04 CDT - #2
+
 - Added an assembled-service acceptance harness that launches the service in a
   Bun subprocess with an injected deterministic provider and clock, then drives
   it through real loopback HTTP and WebSocket connections.
@@ -77,4 +80,33 @@
   - Graceful stop closes WebSockets with code `1000` and exits with code `0`;
     the controlled abnormal-failure command throws from the provider and yields
     an unclean socket close plus process exit code `1`.
+
+---
+
+## 2026-07-23 00:50 - Tooling sidebar (oxlint + oxfmt)
+
+- Installed `oxlint` and `oxfmt` as root dev dependencies and made them the
+  pre-commit gate: a checked-in `.githooks/pre-commit` lints and format-checks
+  staged files, activated via `core.hooksPath` set by the root `prepare`
+  script on `bun install`. One repo-wide `oxfmt` pass reformatted 51 files so
+  the check passes from now on.
+- Files changed: `package.json` (deps + `lint`/`format`/`format:check`/`prepare`
+  scripts), `.oxlintrc.json`, `.oxfmtrc.json`, `.githooks/pre-commit`,
+  `bun.lock`, plus mechanical formatting across the repo.
+- **Learnings for future iterations:**
+  - Run `bun run lint` and `bun run format` before committing; the pre-commit
+    hook rejects unformatted or lint-erroring staged files (warnings don't
+    block, errors do).
+  - The generated Stream Deck bundle
+    `apps/stream-deck/com.status-dashboard.stream-deck.sdPlugin/**` is excluded
+    via `ignorePatterns` in both `.oxlintrc.json` and `.oxfmtrc.json` — keep
+    generated artifacts out of lint/format scope the same way.
+  - Both tools exit non-zero when every file passed to them is ignored; the
+    hook passes `--no-error-on-unmatched-pattern` to avoid spurious failures.
+  - oxfmt formats JSON/JSONC too, and its style prefers explicit parens and
+    sorted formatting; don't hand-fight it — run `bun run format`.
+  - `bun add` writes explicit registry tarball URLs into `bun.lock` when a
+    non-default registry is active (e.g. via `BUN_CONFIG_REGISTRY`); install
+    against the default registry so the lockfile stays registry-agnostic.
+
 ---

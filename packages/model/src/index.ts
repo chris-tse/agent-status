@@ -20,9 +20,7 @@ export const ProviderConnectivitySchema = z.enum([
   "degraded",
   "disconnected",
 ]);
-export type ProviderConnectivity = z.infer<
-  typeof ProviderConnectivitySchema
->;
+export type ProviderConnectivity = z.infer<typeof ProviderConnectivitySchema>;
 
 export const ProviderStatusSchema = z.object({
   id: ProviderIdSchema,
@@ -33,15 +31,8 @@ export const ProviderStatusSchema = z.object({
 });
 export type ProviderStatus = z.infer<typeof ProviderStatusSchema>;
 
-export const AgentLifecycleStatusSchema = z.enum([
-  "running",
-  "waiting",
-  "completed",
-  "failed",
-]);
-export type AgentLifecycleStatus = z.infer<
-  typeof AgentLifecycleStatusSchema
->;
+export const AgentLifecycleStatusSchema = z.enum(["running", "waiting", "completed", "failed"]);
+export type AgentLifecycleStatus = z.infer<typeof AgentLifecycleStatusSchema>;
 
 export const AgentResourceSchema = z
   .object({
@@ -69,10 +60,7 @@ export const AgentResourceSchema = z
       });
     }
 
-    if (
-      resource.startedAt !== undefined &&
-      Date.parse(resource.startedAt) < createdAt
-    ) {
+    if (resource.startedAt !== undefined && Date.parse(resource.startedAt) < createdAt) {
       context.addIssue({
         code: "custom",
         path: ["startedAt"],
@@ -82,8 +70,7 @@ export const AgentResourceSchema = z
 
     if (
       resource.completedAt !== undefined &&
-      Date.parse(resource.completedAt) <
-        Date.parse(resource.startedAt ?? resource.createdAt)
+      Date.parse(resource.completedAt) < Date.parse(resource.startedAt ?? resource.createdAt)
     ) {
       context.addIssue({
         code: "custom",
@@ -98,15 +85,8 @@ export type AgentResource = z.infer<typeof AgentResourceSchema>;
 export const StatefulResourceSchema = AgentResourceSchema;
 export type StatefulResource = z.infer<typeof StatefulResourceSchema>;
 
-export const StatusEventSeveritySchema = z.enum([
-  "info",
-  "success",
-  "warning",
-  "error",
-]);
-export type StatusEventSeverity = z.infer<
-  typeof StatusEventSeveritySchema
->;
+export const StatusEventSeveritySchema = z.enum(["info", "success", "warning", "error"]);
+export type StatusEventSeverity = z.infer<typeof StatusEventSeveritySchema>;
 
 export const StatusEventSchema = z
   .object({
@@ -174,9 +154,7 @@ export const DashboardSnapshotMessageSchema = z.object({
   type: z.literal("snapshot"),
   snapshot: DashboardSnapshotSchema,
 });
-export type DashboardSnapshotMessage = z.infer<
-  typeof DashboardSnapshotMessageSchema
->;
+export type DashboardSnapshotMessage = z.infer<typeof DashboardSnapshotMessageSchema>;
 
 export const DashboardUpdateMessageSchema = z.object({
   type: z.literal("update"),
@@ -184,27 +162,21 @@ export const DashboardUpdateMessageSchema = z.object({
   generatedAt: TimestampSchema,
   changes: z.array(DashboardChangeSchema).min(1),
 });
-export type DashboardUpdateMessage = z.infer<
-  typeof DashboardUpdateMessageSchema
->;
+export type DashboardUpdateMessage = z.infer<typeof DashboardUpdateMessageSchema>;
 
 export const DashboardResetMessageSchema = z.object({
   type: z.literal("reset"),
   generatedAt: TimestampSchema,
   reason: z.string().trim().min(1).optional(),
 });
-export type DashboardResetMessage = z.infer<
-  typeof DashboardResetMessageSchema
->;
+export type DashboardResetMessage = z.infer<typeof DashboardResetMessageSchema>;
 
 export const DashboardWireMessageSchema = z.discriminatedUnion("type", [
   DashboardSnapshotMessageSchema,
   DashboardUpdateMessageSchema,
   DashboardResetMessageSchema,
 ]);
-export type DashboardWireMessage = z.infer<
-  typeof DashboardWireMessageSchema
->;
+export type DashboardWireMessage = z.infer<typeof DashboardWireMessageSchema>;
 
 /**
  * Stable identifier a probe uses to recognize this application on the
@@ -235,15 +207,8 @@ export const HealthResponseSchema = z.object({
 });
 export type HealthResponse = z.infer<typeof HealthResponseSchema>;
 
-export const StatusClassificationSchema = z.enum([
-  "active",
-  "attention",
-  "success",
-  "error",
-]);
-export type StatusClassification = z.infer<
-  typeof StatusClassificationSchema
->;
+export const StatusClassificationSchema = z.enum(["active", "attention", "success", "error"]);
+export type StatusClassification = z.infer<typeof StatusClassificationSchema>;
 
 const statusClassifications = {
   running: "active",
@@ -252,8 +217,6 @@ const statusClassifications = {
   failed: "error",
 } as const satisfies Record<AgentLifecycleStatus, StatusClassification>;
 
-export function classifyAgentStatus(
-  status: AgentLifecycleStatus,
-): StatusClassification {
+export function classifyAgentStatus(status: AgentLifecycleStatus): StatusClassification {
   return statusClassifications[status];
 }

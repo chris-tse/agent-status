@@ -1,16 +1,11 @@
-import {
-  spawn,
-  type ChildProcessWithoutNullStreams,
-} from "node:child_process";
+import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
 import type { DashboardChange } from "@status-dashboard/model";
 
 const START_TIMEOUT_MS = 5_000;
 const MESSAGE_TIMEOUT_MS = 2_000;
-const FIXTURE_PATH = fileURLToPath(
-  new URL("../fixtures/acceptance-service.ts", import.meta.url),
-);
+const FIXTURE_PATH = fileURLToPath(new URL("../fixtures/acceptance-service.ts", import.meta.url));
 
 interface PendingMessage {
   resolve(value: unknown): void;
@@ -92,11 +87,7 @@ class ConnectedSocket implements AcceptanceSocket {
         timer: setTimeout(() => {
           const index = this.#pending.indexOf(pending);
           if (index >= 0) this.#pending.splice(index, 1);
-          reject(
-            new Error(
-              `Timed out after ${timeoutMs}ms waiting for a WebSocket message`,
-            ),
-          );
+          reject(new Error(`Timed out after ${timeoutMs}ms waiting for a WebSocket message`));
         }, timeoutMs),
       };
       this.#pending.push(pending);
@@ -112,9 +103,7 @@ class ConnectedSocket implements AcceptanceSocket {
   }
 }
 
-function waitForLine(
-  child: ChildProcessWithoutNullStreams,
-): Promise<Record<string, unknown>> {
+function waitForLine(child: ChildProcessWithoutNullStreams): Promise<Record<string, unknown>> {
   return new Promise((resolve, reject) => {
     let output = "";
     let errors = "";
@@ -178,17 +167,12 @@ export async function startAcceptanceService(): Promise<AcceptanceService> {
   let stopped = false;
   let controlSequence = 0;
   let controlOutput = "";
-  const pendingControls = new Map<
-    number,
-    { resolve(): void; reject(error: Error): void }
-  >();
+  const pendingControls = new Map<number, { resolve(): void; reject(error: Error): void }>();
   const exit = new Promise<ProcessExit>((resolve) => {
     child.once("exit", (code, signal) => {
       for (const pending of pendingControls.values()) {
         pending.reject(
-          new Error(
-            `Acceptance service exited before acknowledging a control command`,
-          ),
+          new Error(`Acceptance service exited before acknowledging a control command`),
         );
       }
       pendingControls.clear();
@@ -228,11 +212,9 @@ export async function startAcceptanceService(): Promise<AcceptanceService> {
       const connected = new ConnectedSocket(socket);
       await new Promise<void>((resolve, reject) => {
         socket.addEventListener("open", () => resolve(), { once: true });
-        socket.addEventListener(
-          "error",
-          () => reject(new Error("WebSocket connection failed")),
-          { once: true },
-        );
+        socket.addEventListener("error", () => reject(new Error("WebSocket connection failed")), {
+          once: true,
+        });
       });
       return connected;
     },

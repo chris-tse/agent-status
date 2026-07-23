@@ -3,10 +3,7 @@ import { createStatusServer } from "./server.js";
 export { SubscriptionBroadcaster } from "./broadcast.js";
 export { loadConfig, isOriginAllowed } from "./config.js";
 export { DemoController } from "./demo-controller.js";
-export {
-  HerdrStatusProvider,
-  type HerdrStatusProviderOptions,
-} from "./herdr-provider.js";
+export { HerdrStatusProvider, type HerdrStatusProviderOptions } from "./herdr-provider.js";
 export type {
   DemoStatusProvider,
   ProviderAdvance,
@@ -15,15 +12,8 @@ export type {
   ProviderMessage,
   StatusProvider,
 } from "./provider.js";
-export {
-  demoResourceIds,
-  SimulatedStatusProvider,
-} from "./simulated-provider.js";
-export {
-  DashboardStore,
-  type Clock,
-  type DashboardState,
-} from "./store.js";
+export { demoResourceIds, SimulatedStatusProvider } from "./simulated-provider.js";
+export { DashboardStore, type Clock, type DashboardState } from "./store.js";
 export {
   createStatusServer,
   handleStatusRequest,
@@ -34,7 +24,5 @@ export {
 
 if (import.meta.main) {
   const service = createStatusServer();
-  console.info(
-    `Status service listening on ${service.server.url.toString()} (WebSocket: /ws)`,
-  );
+  console.info(`Status service listening on ${service.server.url.toString()} (WebSocket: /ws)`);
 }

@@ -7,15 +7,11 @@ import {
   type WillDisappearEvent,
 } from "@elgato/streamdeck";
 
-import {
-  type DashboardClient,
-  type DashboardClientSnapshot,
-} from "../dashboard-client.js";
+import { type DashboardClient, type DashboardClientSnapshot } from "../dashboard-client.js";
 import { renderKeyImage } from "../key-image.js";
 import { SlotPool } from "../slot-pool.js";
 
-export const AGENT_SLOT_ACTION_UUID =
-  "com.status-dashboard.stream-deck.agent-slot";
+export const AGENT_SLOT_ACTION_UUID = "com.status-dashboard.stream-deck.agent-slot";
 
 @action({ UUID: AGENT_SLOT_ACTION_UUID })
 export class AgentSlotAction extends SingletonAction {
@@ -77,9 +73,7 @@ export class AgentSlotAction extends SingletonAction {
   }
 
   private renderAll(): void {
-    const resources = new Map(
-      this.#snapshot.resources.map((resource) => [resource.id, resource]),
-    );
+    const resources = new Map(this.#snapshot.resources.map((resource) => [resource.id, resource]));
 
     for (const [slotId, visibleAction] of this.#visibleActions) {
       const resourceId = this.#pool.assignmentFor(slotId);

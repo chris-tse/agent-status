@@ -35,9 +35,7 @@ export function useAgentHover(): {
 
   const onMove = useCallback((event: MouseEvent) => {
     setHover((current) =>
-      current === undefined
-        ? current
-        : { ...current, x: event.clientX, y: event.clientY },
+      current === undefined ? current : { ...current, x: event.clientX, y: event.clientY },
     );
   }, []);
 
@@ -59,22 +57,14 @@ const PAD = 14;
 const CARD_WIDTH = 280;
 const CARD_HEIGHT = 110;
 
-export function HoverCard({
-  hover,
-  now,
-}: {
-  hover: HoverState | undefined;
-  now: number;
-}) {
+export function HoverCard({ hover, now }: { hover: HoverState | undefined; now: number }) {
   if (hover === undefined) return null;
 
   const { agent, x, y } = hover;
   const status = displayStatus(agent);
   const elapsed = runtime(agent, now);
-  const left =
-    x + PAD + CARD_WIDTH > window.innerWidth ? x - CARD_WIDTH - PAD : x + PAD;
-  const top =
-    y + PAD + CARD_HEIGHT > window.innerHeight ? y - CARD_HEIGHT - PAD : y + PAD;
+  const left = x + PAD + CARD_WIDTH > window.innerWidth ? x - CARD_WIDTH - PAD : x + PAD;
+  const top = y + PAD + CARD_HEIGHT > window.innerHeight ? y - CARD_HEIGHT - PAD : y + PAD;
 
   return (
     <div className="hover-card" role="tooltip" style={{ left, top }}>

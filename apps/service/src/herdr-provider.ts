@@ -9,23 +9,13 @@ import type {
 } from "@status-dashboard/model";
 import { z } from "zod";
 
-import type {
-  ProviderConnection,
-  ProviderListener,
-  StatusProvider,
-} from "./provider.js";
+import type { ProviderConnection, ProviderListener, StatusProvider } from "./provider.js";
 import type { Clock } from "./store.js";
 
 const PROVIDER_ID = "herdr";
 const EVENT_LIFETIME_MS = 10 * 60 * 1_000;
 
-const HerdrAgentStatusSchema = z.enum([
-  "idle",
-  "working",
-  "blocked",
-  "done",
-  "unknown",
-]);
+const HerdrAgentStatusSchema = z.enum(["idle", "working", "blocked", "done", "unknown"]);
 
 const HerdrAgentSchema = z
   .object({
@@ -112,13 +102,7 @@ function mapStatus(status: HerdrAgent["agent_status"]): AgentLifecycleStatus {
 }
 
 function agentLabel(agent: HerdrAgent): string {
-  return (
-    agent.title ??
-    agent.name ??
-    agent.display_agent ??
-    agent.agent ??
-    agent.pane_id
-  );
+  return agent.title ?? agent.name ?? agent.display_agent ?? agent.agent ?? agent.pane_id;
 }
 
 function mapAgent(
@@ -130,9 +114,7 @@ function mapAgent(
   const status = mapStatus(agent.agent_status);
   const label = agentLabel(agent);
   const attentionReason =
-    status === "waiting"
-      ? (agent.title ?? "Herdr agent is blocked")
-      : undefined;
+    status === "waiting" ? (agent.title ?? "Herdr agent is blocked") : undefined;
   const unchanged =
     previous !== undefined &&
     previous.status === status &&
@@ -151,8 +133,7 @@ function mapAgent(
     updatedAt: unchanged ? previous.updatedAt : timestamp,
     startedAt:
       previous === undefined ||
-      (status === "running" &&
-        (previous.status === "completed" || previous.status === "failed"))
+      (status === "running" && (previous.status === "completed" || previous.status === "failed"))
         ? timestamp
         : (previous.startedAt ?? timestamp),
   };
@@ -164,9 +145,7 @@ function mapAgent(
     return {
       ...common,
       completedAt:
-        unchanged && previous?.completedAt !== undefined
-          ? previous.completedAt
-          : timestamp,
+        unchanged && previous?.completedAt !== undefined ? previous.completedAt : timestamp,
     };
   }
   return common;
@@ -247,19 +226,14 @@ function protocolError(value: unknown): Error | undefined {
     : undefined;
 }
 
-async function requestSnapshot(
-  socketPath: string,
-  timeoutMs: number,
-): Promise<HerdrSnapshot> {
+async function requestSnapshot(socketPath: string, timeoutMs: number): Promise<HerdrSnapshot> {
   return await new Promise<HerdrSnapshot>((resolve, reject) => {
     const socket = createConnection(socketPath);
     let buffer = "";
     let settled = false;
 
     const finish = (
-      result:
-        | { type: "resolve"; snapshot: HerdrSnapshot }
-        | { type: "reject"; error: unknown },
+      result: { type: "resolve"; snapshot: HerdrSnapshot } | { type: "reject"; error: unknown },
     ) => {
       if (settled) return;
       settled = true;
@@ -362,9 +336,7 @@ async function openSubscription(
 
     socket.setEncoding("utf8");
     socket.setTimeout(timeoutMs, () => {
-      reportFailure(
-        new Error(`Herdr subscription timed out after ${timeoutMs}ms`),
-      );
+      reportFailure(new Error(`Herdr subscription timed out after ${timeoutMs}ms`));
       socket.destroy();
     });
     socket.once("connect", () => {
@@ -398,9 +370,7 @@ async function openSubscription(
             onEvent();
           }
         } catch (error) {
-          reportFailure(
-            error instanceof Error ? error : new Error(errorMessage(error)),
-          );
+          reportFailure(error instanceof Error ? error : new Error(errorMessage(error)));
           socket.destroy();
           return;
         }
@@ -451,21 +421,12 @@ class HerdrConnection implements ProviderConnection {
     if (this.#closed || this.#busy) return;
     this.#busy = true;
     try {
-      let snapshot = await requestSnapshot(
-        this.#socketPath,
-        this.#requestTimeoutMs,
-      );
+      let snapshot = await requestSnapshot(this.#socketPath, this.#requestTimeoutMs);
       await this.#replaceSubscription(snapshot);
-      snapshot = await requestSnapshot(
-        this.#socketPath,
-        this.#requestTimeoutMs,
-      );
+      snapshot = await requestSnapshot(this.#socketPath, this.#requestTimeoutMs);
       if (this.#paneKey(snapshot) !== this.#subscriptionKey) {
         await this.#replaceSubscription(snapshot);
-        snapshot = await requestSnapshot(
-          this.#socketPath,
-          this.#requestTimeoutMs,
-        );
+        snapshot = await requestSnapshot(this.#socketPath, this.#requestTimeoutMs);
       }
       if (!this.#closed) this.#applySnapshot(snapshot);
     } catch (error) {
@@ -487,16 +448,10 @@ class HerdrConnection implements ProviderConnection {
     }
     this.#busy = true;
     try {
-      let snapshot = await requestSnapshot(
-        this.#socketPath,
-        this.#requestTimeoutMs,
-      );
+      let snapshot = await requestSnapshot(this.#socketPath, this.#requestTimeoutMs);
       if (this.#paneKey(snapshot) !== this.#subscriptionKey) {
         await this.#replaceSubscription(snapshot);
-        snapshot = await requestSnapshot(
-          this.#socketPath,
-          this.#requestTimeoutMs,
-        );
+        snapshot = await requestSnapshot(this.#socketPath, this.#requestTimeoutMs);
       }
       if (!this.#closed) this.#applySnapshot(snapshot);
     } catch (error) {
@@ -603,10 +558,7 @@ class HerdrConnection implements ProviderConnection {
     this.#subscription?.close();
     this.#subscription = undefined;
     this.#subscriptionKey = "";
-    this.#emitConnectivity(
-      "disconnected",
-      `Herdr unavailable: ${errorMessage(error)}`,
-    );
+    this.#emitConnectivity("disconnected", `Herdr unavailable: ${errorMessage(error)}`);
     if (this.#retryTimer !== undefined) clearTimeout(this.#retryTimer);
     this.#retryTimer = setTimeout(() => {
       this.#retryTimer = undefined;
@@ -616,10 +568,7 @@ class HerdrConnection implements ProviderConnection {
     }, this.#retryDelayMs);
   }
 
-  #emitConnectivity(
-    connectivity: ProviderStatus["connectivity"],
-    message: string,
-  ): void {
+  #emitConnectivity(connectivity: ProviderStatus["connectivity"], message: string): void {
     this.#listener({
       type: "changes",
       changes: [
