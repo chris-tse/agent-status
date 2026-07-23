@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "runtime": "replace-with-runtime-name",
+  "buildId": "replace-with-release-identifier",
+  "workingDirectory": "../..",
+  "release": {
+    "distributionPath": "../../path/to/release.dmg",
+    "installedPath": "../../path/to/Installed Dashboard.app"
+  },
+  "commands": {
+    "developerBuild": "replace with command that performs and awaits one developer build",
+    "developerReload": "replace with command that performs and awaits one developer reload",
+    "launch": "replace with command that launches the release dashboard",
+    "waitForDashboard": "replace with command that waits until the dashboard is usable",
+    "processIds": "replace with command that prints all product PIDs",
+    "closeDashboard": "replace with command that closes the dashboard and awaits renderer destruction",
+    "openDashboard": "replace with command that reopens the dashboard",
+    "triggerReconnect": "replace with command that interrupts the service connection",
+    "waitForReconnect": "replace with command that awaits a recovered current snapshot",
+    "stop": "replace with command that stops every process started for measurement"
+  },
+  "sampling": {
+    "settleSeconds": 15,
+    "intervalSeconds": 1,
+    "sampleCount": 10
+  }
+}

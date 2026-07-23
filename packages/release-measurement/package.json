@@ -1,0 +1,16 @@
+{
+  "name": "@status-dashboard/release-measurement",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "measure": "bun src/cli.ts",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "build": "tsc -p tsconfig.json"
+  },
+  "engines": {
+    "bun": "1.3.14"
+  },
+  "packageManager": "bun@1.3.14"
+}

@@ -78,6 +78,10 @@
         "vitest": "latest",
       },
     },
+    "packages/release-measurement": {
+      "name": "@status-dashboard/release-measurement",
+      "version": "0.0.0",
+    },
   },
   "packages": {
     "@adobe/css-tools": ["@adobe/css-tools@4.5.0", "", {}, "sha512-6OzddxPio9UiWTCemp4N8cYLV2ZN1ncRnV1cVGtve7dhPOtRkleRyx32GQCYSwDYgaHU3USMm84tNsvKzRCa1Q=="],
@@ -401,6 +405,8 @@
     "@status-dashboard/dashboard": ["@status-dashboard/dashboard@workspace:apps/dashboard"],
 
     "@status-dashboard/model": ["@status-dashboard/model@workspace:packages/model"],
+
+    "@status-dashboard/release-measurement": ["@status-dashboard/release-measurement@workspace:packages/release-measurement"],
 
     "@status-dashboard/service": ["@status-dashboard/service@workspace:apps/service"],
 

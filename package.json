@@ -17,6 +17,7 @@
     "dev:dashboard": "bun run --filter '@status-dashboard/dashboard' dev",
     "service": "bun run --filter '@status-dashboard/service' lifecycle",
     "preview:dashboard": "bun run --filter '@status-dashboard/dashboard' preview",
+    "measure:release": "bun packages/release-measurement/src/cli.ts",
     "build": "bun run --filter '*' build",
     "test": "bun run --filter '*' test",
     "typecheck": "bun run --filter '*' typecheck && bun run typecheck:scripts",
