@@ -26,6 +26,8 @@ export {
 } from "./store.js";
 export {
   createStatusServer,
+  handleStatusRequest,
+  type RequestContext,
   type RunningStatusServer,
   type StatusServerOptions,
 } from "./server.js";
