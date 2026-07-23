@@ -74,7 +74,10 @@ local reference.
 
 ## Service API and demo
 
-- `GET /health` returns service, provider, and snapshot-version status.
+- `GET /health` returns application identity (`service`), protocol version
+  (`protocolVersion`), provider, and snapshot-version status, so a probe can
+  tell a compatible service from one speaking an incompatible protocol or an
+  unrelated process on the endpoint.
 - `GET /api/snapshot` returns the current validated dashboard snapshot.
 - `GET /ws` upgrades to the WebSocket feed and immediately sends a snapshot.
 - `POST /api/demo/advance` moves the live demo agent through waiting, running,

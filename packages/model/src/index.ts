@@ -206,6 +206,35 @@ export type DashboardWireMessage = z.infer<
   typeof DashboardWireMessageSchema
 >;
 
+/**
+ * Stable identifier a probe uses to recognize this application on the
+ * configured endpoint. A response whose `service` differs (or is absent) marks
+ * an unrelated process squatting on the endpoint rather than the status
+ * service.
+ */
+export const SERVICE_NAME = "ambient-status-dashboard";
+
+/**
+ * Version of the HTTP and WebSocket contract that consumers speak. A response
+ * carrying the expected {@link SERVICE_NAME} but a different protocol version
+ * is the expected service speaking an incompatible protocol.
+ */
+export const PROTOCOL_VERSION = 1;
+
+/**
+ * Shape of the service `/health` response. Carries application identity and
+ * protocol version so a probe can distinguish a compatible service, the
+ * expected service on an incompatible protocol, and an unrelated listener.
+ */
+export const HealthResponseSchema = z.object({
+  status: z.literal("ok"),
+  service: z.string().trim().min(1),
+  protocolVersion: z.number().int().nonnegative(),
+  version: z.number().int().nonnegative(),
+  provider: ProviderIdSchema,
+});
+export type HealthResponse = z.infer<typeof HealthResponseSchema>;
+
 export const StatusClassificationSchema = z.enum([
   "active",
   "attention",
