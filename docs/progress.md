@@ -48,3 +48,33 @@
     (single package). Tests that bind sockets (e.g. the Herdr unix-socket test) may
     hit `EPERM` inside a restricted sandbox — run them without sandbox restrictions.
 ---
+
+## 2026-07-23 00:04 CDT - #2
+- Added an assembled-service acceptance harness that launches the service in a
+  Bun subprocess with an injected deterministic provider and clock, then drives
+  it through real loopback HTTP and WebSocket connections.
+- Covered initial snapshots, sequential and stale updates, reconnect recovery,
+  all provider connectivity transitions, health endpoint identity, graceful
+  shutdown, and abnormal provider failure using only process and wire-visible
+  assertions.
+- Files changed:
+  - `apps/service/test/acceptance.test.ts` — end-to-end acceptance scenarios.
+  - `apps/service/test/support/acceptance-harness.ts` — reusable subprocess,
+    HTTP/WebSocket, provider-control, clock-control, and lifecycle harness.
+  - `apps/service/test/fixtures/acceptance-service.ts` — Bun service assembly
+    with the controlled provider and clock.
+  - `docs/progress.md` — implementation notes and test guidance.
+- **Learnings for future iterations:**
+  - Vitest runs in Node, so real `Bun.serve` acceptance tests must spawn a Bun
+    subprocess; the fixture binds port `0` and reports Bun's selected loopback
+    URL to avoid fixed-port collisions.
+  - Provider and clock controls travel over the child process's stdin, with
+    acknowledgements on stdout so a returned control promise means the assembled
+    service has applied the command before the next HTTP or WebSocket action.
+  - Run the focused seam with
+    `bun run --filter '@status-dashboard/service' test -- test/acceptance.test.ts`;
+    it remains part of the normal repository-wide `bun run test`.
+  - Graceful stop closes WebSockets with code `1000` and exits with code `0`;
+    the controlled abnormal-failure command throws from the provider and yields
+    an unclean socket close plus process exit code `1`.
+---
