@@ -185,7 +185,7 @@ export class DashboardClient {
     this.#reconnectTimer = setTimeout(() => {
       this.#reconnectTimer = undefined;
       this.connect();
-    }, 2_000);
+    }, 10_000);
   }
 
   private setConnection(connection: ConnectionState): void {

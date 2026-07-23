@@ -57,6 +57,9 @@ the first planned integration, not the architecture.
 Every output consumes dashboard state. Providers never communicate directly
 with presentation surfaces or with one another.
 
+The local service has a lifecycle independent of every presentation surface.
+Closing one surface must not interrupt status delivery to another.
+
 ## Provider model
 
 Each source application is represented by a provider. A provider is responsible
