@@ -24,8 +24,11 @@ normal recorded run uses the defaults so all candidates remain side by side.
 ## Required configuration
 
 Paths are resolved relative to the configuration file. Commands run through
-`/bin/zsh -lc` from `workingDirectory`, which is also relative to the
-configuration file.
+non-login `/bin/zsh -c` shells from `workingDirectory`, which is also relative
+to the configuration file. The runner inherits its environment from the
+invoking terminal; it does not load user login profiles into every measured
+operation because their startup work would contaminate timings and make results
+machine-specific.
 
 - `runtime` is the candidate name and `buildId` identifies the measured release.
 - `release.distributionPath` is the final compressed release file, such as a

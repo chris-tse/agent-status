@@ -254,7 +254,7 @@ async function runProtocolCommand(
   config: MeasurementConfig,
   name: CommandName,
 ): Promise<CommandResult> {
-  return await run("/bin/zsh", ["-lc", config.commands[name]], config.workingDirectory);
+  return await run("/bin/zsh", ["-c", config.commands[name]], config.workingDirectory);
 }
 
 async function measureCommand(config: MeasurementConfig, name: CommandName): Promise<number> {

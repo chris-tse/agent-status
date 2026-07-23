@@ -192,7 +192,9 @@
     measurement order, units, aggregation, metadata, and output schema.
   - **Gotcha:** macOS `top` reports an invalid first CPU sample. Use delta mode,
     request `pid,cpu,rsize,idlew`, discard the first sample, and aggregate every
-    PID belonging to the product so renderer overhead remains visible.
+    PID belonging to the product so renderer overhead remains visible. Protocol
+    commands use non-login shells; repeatedly loading a user `.zprofile` adds
+    variable seconds to both tests and the timings being measured.
   - **Useful context:** `top`'s `IDLEW` delta is available without elevated
     privileges; its composite `POWER` score is not an acceptable substitute for
     wakeups. `du -sk` and compressed-file byte length likewise remain distinct

@@ -127,6 +127,8 @@ describe("release measurement CLI", () => {
     const binDirectory = path.join(directory, "bin");
     await mkdir(binDirectory);
     await writeFakeTop(binDirectory);
+    // Login-profile startup must not contaminate each timed protocol command.
+    await writeFile(path.join(directory, ".zprofile"), "sleep 0.5\n");
     const commandLog = path.join(directory, "commands.log");
     const configPath = await createConfig(directory, "electrobun", commandLog);
     const outputPath = path.join(directory, "results", "electrobun.json");
@@ -137,6 +139,7 @@ describe("release measurement CLI", () => {
       {
         ...process.env,
         PATH: `${binDirectory}:${process.env.PATH ?? ""}`,
+        ZDOTDIR: directory,
       },
     );
 
