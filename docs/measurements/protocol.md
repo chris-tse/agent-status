@@ -61,12 +61,16 @@ instead of omitting a measure or substituting one metric for another.
 ## Resource sampling
 
 The default protocol waits 15 seconds for each idle state, then asks macOS
-`top` for 10 one-second delta samples of all product PIDs. The first sample is
-discarded because macOS documents its CPU value as invalid. For each remaining
-interval the runner:
+`top` for 10 one-second samples of all product PIDs. It runs two synchronized
+samplers: delta mode (`-c d`) supplies CPU and `IDLEW` deltas, while
+non-calculating mode (`-c n`) supplies the current resident size. Delta mode's
+`RSIZE` column is a change and can be negative, so it is not a resident-memory
+measurement. The first result from each sampler is discarded because macOS
+documents the first CPU sample as invalid and both streams must remain aligned.
+For each remaining interval the runner:
 
-1. sums resident size, CPU percentage, and idle wakeup deltas across all
-   configured product PIDs;
+1. sums current resident size from non-calculating mode and CPU percentage and
+   idle-wakeup deltas from delta mode across all configured product PIDs;
 2. averages the aggregate resident size and CPU percentage across intervals;
 3. divides the aggregate idle-wakeup count by elapsed sample seconds.
 

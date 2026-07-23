@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "runtime": "Electrobun 1.18.1",
+  "buildId": "0.1.0-stable-macos-arm64",
+  "workingDirectory": "../../..",
+  "release": {
+    "distributionPath": "../../../apps/electrobun/.electrobun/artifacts/stable-macos-arm64-AmbientStatusDashboard.dmg",
+    "installedPath": "../../../apps/electrobun/.electrobun/build/stable-macos-arm64/Ambient Status Dashboard.app"
+  },
+  "commands": {
+    "developerBuild": "bun run --cwd apps/electrobun build:dev",
+    "developerReload": "bun run --cwd apps/electrobun dev:reload",
+    "launch": "pgrep -f '/System/Library/Frameworks/WebKit.framework/.*/com.apple.WebKit.(GPU|Networking|WebContent)' > /tmp/status-dashboard-electrobun-webkit-baseline || :; nohup 'apps/electrobun/.electrobun/build/stable-macos-arm64/Ambient Status Dashboard.app/Contents/MacOS/launcher' >/tmp/status-dashboard-electrobun.log 2>&1 &",
+    "waitForDashboard": "bun apps/electrobun/scripts/control.ts wait-dashboard",
+    "processIds": "bun apps/electrobun/scripts/control.ts process-ids",
+    "closeDashboard": "bun apps/electrobun/scripts/control.ts close-dashboard",
+    "openDashboard": "bun apps/electrobun/scripts/control.ts show-dashboard",
+    "triggerReconnect": "bun apps/electrobun/scripts/control.ts restart-service",
+    "waitForReconnect": "bun apps/electrobun/scripts/control.ts wait-dashboard",
+    "stop": "bun apps/electrobun/scripts/control.ts stop-and-quit || true"
+  },
+  "sampling": {
+    "settleSeconds": 15,
+    "intervalSeconds": 1,
+    "sampleCount": 10
+  }
+}

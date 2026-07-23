@@ -201,3 +201,64 @@
     installed and distribution size measures.
 
 ---
+
+## 2026-07-23 02:08 CDT - #5
+
+- Added a production-shaped Electrobun 1.18.1 macOS application containing the
+  real React dashboard, Bun status service, and Herdr provider. Native WebKit,
+  tray and application menus, stable packaging, and explicit dashboard and
+  service lifecycle controls are all exercised by the built application.
+- Defined and tested product lifecycle semantics: opening starts the service,
+  Close destroys only the dashboard window, explicit Stop remains stopped when
+  the dashboard reopens, and Stop Service and Quit performs ordered cleanup.
+  Documented the critical limitation that a main-process exit, crash, kill, or
+  logout also terminates the embedded service, so this topology does not
+  satisfy the accepted independent-service ADR.
+- Built the stable arm64 `.app` and DMG, then exercised launch, health,
+  dashboard Close, held Stop, Start, restart readiness, and Stop-and-Quit
+  against the package. Herdr absence produces disconnected/retry state without
+  taking down the local service.
+- Recorded the shared release measurement:
+  `Electrobun-1.18.1-0.1.0-stable-macos-arm64-2026-07-23T07-04-40-488Z.json`.
+  The DMG is 17.42 MiB, installed application 65.28 MiB, dashboard-open RSS
+  83.79 MiB, dashboard-closed RSS 52.00 MiB, open/closed idle CPU 0.32%/0.10%,
+  open/closed wakeups 0.10/0.00 per second, startup 498.62 ms, reconnect
+  97.88 ms, developer build 3076.25 ms, and developer reload 1692.51 ms.
+- Corrected the shared macOS telemetry adapter after a real measurement exposed
+  negative delta-mode `RSIZE` values. Parallel `top -c d` and `top -c n`
+  streams now measure CPU/idle-wakeup deltas and current RSS respectively, with
+  public CLI coverage proving both modes are used.
+- Files changed:
+  - `apps/electrobun/**` — runtime package, framework configuration, lifecycle
+    controller and tests, native entrypoint, and measurement control adapter.
+  - `apps/dashboard/vite.config.ts`, `apps/service/package.json` — packaged
+    relative dashboard assets and the service's public built workspace export.
+  - `packages/release-measurement/src/cli.ts`,
+    `packages/release-measurement/test/cli.test.ts` — correct macOS RSS sampling
+    and regression coverage.
+  - `docs/measurements/configs/electrobun.json`,
+    `docs/measurements/results/Electrobun-*.json`,
+    `docs/measurements/comparison.md`, `docs/measurements/protocol.md` —
+    repeatable adapter, raw result, comparison, and corrected protocol.
+  - `docs/spikes/electrobun.md`, `README.md`, `.gitignore`, `bun.lock` —
+    workflow, lifecycle, packaging findings, workspace wiring, and ignored
+    outputs.
+- **Learnings for future iterations:**
+  - **Patterns discovered:** Keep framework callbacks behind a serialized
+    lifecycle controller and measure the candidate through its packaged public
+    controls. This makes Close-versus-Stop behavior testable without binding
+    unit tests to Electrobun event details.
+  - **Gotcha:** Electrobun 1.18.1's launcher expects `app/bun/index.js`; a
+    differently named configured entrypoint packages successfully but does not
+    run. Its public Bun barrel also imports unrelated rendering libraries and
+    side effects; exact internal core imports reduced the development main
+    bundle from roughly 5.8-7.1 MB to 469 KB, but those paths are intentionally
+    version-pinned and must be revalidated during upgrades.
+  - **Useful context:** macOS reparents native WebKit helpers to `launchd`, so
+    the adapter subtracts a prelaunch WebKit PID baseline to include the
+    candidate GPU, networking, and WebContent processes. The locally built
+    stable package is neither Developer ID signed nor notarized, direct launcher
+    invocation was more reliable than Launch Services, and the loopback
+    measurement control endpoint must be removed or secured for production.
+
+---

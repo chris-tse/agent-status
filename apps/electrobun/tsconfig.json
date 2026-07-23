@@ -1,0 +1,12 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2024", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "noEmit": true,
+    "exactOptionalPropertyTypes": false,
+    "types": ["bun"]
+  },
+  "include": ["electrobun.config.ts", "src/**/*.ts", "test/**/*.ts", "types/**/*.d.ts"]
+}

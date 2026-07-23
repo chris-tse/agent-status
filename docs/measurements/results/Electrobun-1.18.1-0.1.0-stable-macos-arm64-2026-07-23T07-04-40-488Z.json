@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "runtime": "Electrobun 1.18.1",
+  "buildId": "0.1.0-stable-macos-arm64",
+  "measuredAt": "2026-07-23T07:04:40.488Z",
+  "source": {
+    "configurationPath": "docs/measurements/configs/electrobun.json",
+    "configurationSha256": "c510c47ef5fbaf51c7be39662a7f40f7d32b8613b1ba616288046b4558852feb",
+    "repositoryCommit": "bbc6b6ec2e0d046b6ef1a688dbf6aff9b02975f4",
+    "repositoryDirty": true
+  },
+  "host": {
+    "macOSVersion": "26.5",
+    "hardwareModel": "MacBookPro18,1",
+    "processor": "Apple M1 Pro",
+    "memoryBytes": 34359738368
+  },
+  "sizes": {
+    "compressedDistributionBytes": 18269521,
+    "installedBytes": 68452352
+  },
+  "idle": {
+    "dashboardOpen": {
+      "residentMemoryBytes": 87855309,
+      "cpuPercent": 0.32,
+      "wakeupsPerSecond": 0.1,
+      "sampleCount": 10,
+      "sampleIntervalSeconds": 1,
+      "processIds": [59119, 59137, 59138, 59139]
+    },
+    "dashboardClosed": {
+      "residentMemoryBytes": 54525952,
+      "cpuPercent": 0.1,
+      "wakeupsPerSecond": 0,
+      "sampleCount": 10,
+      "sampleIntervalSeconds": 1,
+      "processIds": [59119, 59137]
+    }
+  },
+  "timings": {
+    "startupMilliseconds": 498.62,
+    "reconnectMilliseconds": 97.88,
+    "developerBuildMilliseconds": 3076.25,
+    "developerReloadMilliseconds": 1692.51
+  }
+}
