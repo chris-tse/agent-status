@@ -110,3 +110,49 @@
     against the default registry so the lockfile stays registry-agnostic.
 
 ---
+
+## 2026-07-23 01:11 CDT - #3
+
+- Added a public service lifecycle controller with `status`, `start`, `stop`,
+  and `restart` operations; compatible endpoint reuse, protocol and unrelated
+  listener rejection, serialized mutations, transition reporting, and health
+  verification are all observable through that interface.
+- Added current-login-session launchd supervision. The generated job is
+  bootstrapped into `gui/<uid>`, stored under Application Support rather than
+  `~/Library/LaunchAgents`, restarted only after unsuccessful exits, and
+  unloaded by explicit Stop.
+- Added the `bun run service <status|start|stop|restart>` terminal interface and
+  documented its behavior.
+- Added public-interface tests using real loopback health endpoints and a
+  session-supervisor boundary, plus launchd integration coverage for the
+  generated plist and `bootstrap`/`bootout` targets. A real launchd smoke test
+  also confirmed abnormal-exit restart with a new PID and explicit unload.
+- Files changed:
+  - `apps/service/src/lifecycle.ts` — lifecycle state machine and production
+    controller assembly.
+  - `apps/service/src/launchd.ts` — launchd plist and session supervision
+    adapter.
+  - `apps/service/src/lifecycle-cli.ts` — thin terminal interface.
+  - `apps/service/src/index.ts` — public lifecycle exports.
+  - `apps/service/test/lifecycle.test.ts` — process and health outcome coverage.
+  - `apps/service/test/launchd-lifecycle.test.ts` — launchd session and plist
+    coverage.
+  - `apps/service/package.json`, `package.json` — lifecycle commands.
+  - `README.md` — lifecycle usage and login-session semantics.
+  - `docs/progress.md` — implementation record.
+- **Learnings for future iterations:**
+  - **Patterns discovered:** Treat launchd and endpoint probing as system
+    boundaries behind the public lifecycle module. This keeps tests focused on
+    process/health outcomes while the production adapter still exercises real
+    `launchctl bootstrap gui/<uid>` and `bootout` semantics.
+  - **Gotcha:** A non-HTTP process can own the port while making `fetch` look
+    like a connection failure. Follow a failed health request with a short TCP
+    listener check before activating launchd, or startup can surface a vague
+    bind error instead of safely identifying the unrelated owner.
+  - **Useful context:** `KeepAlive` with `SuccessfulExit = false` restarts
+    abnormal exits without turning an explicit unload into a restart. Keeping
+    the plist outside `~/Library/LaunchAgents` means the manually bootstrapped
+    GUI-session job disappears at logout and is not rediscovered at the next
+    login.
+
+---

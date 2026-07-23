@@ -49,6 +49,26 @@ bun run dev:service
 bun run dev:dashboard
 ```
 
+## Service lifecycle
+
+On macOS, manage the production-shaped background service from the terminal:
+
+```sh
+bun run service status
+bun run service start
+bun run service stop
+bun run service restart
+```
+
+Start bootstraps a launchd job into the current `gui/<uid>` login session.
+launchd restarts the active service after an abnormal exit, while an explicit
+stop unloads the job. The generated plist is stored below
+`~/Library/Application Support/Ambient Status Dashboard/launchd`, not
+`~/Library/LaunchAgents`, so it is not a login item and is not activated in the
+next login session. A compatible service already using the endpoint is reused;
+an unrelated or protocol-incompatible listener produces an error and is never
+terminated.
+
 Set `PORT` or `HOST` to change the service listener. `CORS_ORIGINS` accepts a
 comma-separated allowlist; without it, browser origins on loopback hosts are
 allowed. Set `VITE_STATUS_SERVICE_URL` when the dashboard should connect to a

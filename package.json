@@ -15,6 +15,7 @@
     "dev": "bun scripts/dev.ts",
     "dev:service": "bun run --filter '@status-dashboard/service' dev",
     "dev:dashboard": "bun run --filter '@status-dashboard/dashboard' dev",
+    "service": "bun run --filter '@status-dashboard/service' lifecycle",
     "preview:dashboard": "bun run --filter '@status-dashboard/dashboard' preview",
     "build": "bun run --filter '*' build",
     "test": "bun run --filter '*' test",
