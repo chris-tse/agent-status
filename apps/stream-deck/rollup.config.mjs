@@ -16,9 +16,7 @@ const config = {
     format: "es",
     sourcemap: isWatching,
     sourcemapPathTransform(relativeSourcePath, sourcemapPath) {
-      return url.pathToFileURL(
-        path.resolve(path.dirname(sourcemapPath), relativeSourcePath),
-      ).href;
+      return url.pathToFileURL(path.resolve(path.dirname(sourcemapPath), relativeSourcePath)).href;
     },
   },
   plugins: [

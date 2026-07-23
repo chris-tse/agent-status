@@ -44,9 +44,7 @@ export class DashboardStore {
   }
 
   apply(changes: readonly DashboardChange[]): DashboardUpdateMessage | undefined {
-    const validated = changes.map((change) =>
-      DashboardChangeSchema.parse(change),
-    );
+    const validated = changes.map((change) => DashboardChangeSchema.parse(change));
     const providers = new Map(this.#providers);
     const resources = new Map(this.#resources);
     const events = new Map(this.#events);
@@ -164,10 +162,7 @@ export class DashboardStore {
     const changes: DashboardChange[] = [];
 
     for (const event of this.#events.values()) {
-      if (
-        event.expiresAt !== undefined &&
-        Date.parse(event.expiresAt) <= timestamp
-      ) {
+      if (event.expiresAt !== undefined && Date.parse(event.expiresAt) <= timestamp) {
         changes.push({ type: "event.remove", eventId: event.id });
       }
     }
@@ -200,21 +195,11 @@ export class DashboardStore {
     }
 
     for (const event of events.values()) {
-      if (
-        event.providerId !== undefined &&
-        !providers.has(event.providerId)
-      ) {
-        throw new Error(
-          `Event ${event.id} references unknown provider ${event.providerId}`,
-        );
+      if (event.providerId !== undefined && !providers.has(event.providerId)) {
+        throw new Error(`Event ${event.id} references unknown provider ${event.providerId}`);
       }
-      if (
-        event.resourceId !== undefined &&
-        !resources.has(event.resourceId)
-      ) {
-        throw new Error(
-          `Event ${event.id} references unknown resource ${event.resourceId}`,
-        );
+      if (event.resourceId !== undefined && !resources.has(event.resourceId)) {
+        throw new Error(`Event ${event.id} references unknown resource ${event.resourceId}`);
       }
     }
   }

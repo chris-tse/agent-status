@@ -13,7 +13,12 @@
   --running-bg: rgba(76, 141, 255, 0.13);
   --blocked-bg: rgba(242, 85, 90, 0.13);
   --done-bg: rgba(62, 207, 114, 0.13);
-  font-family: Inter, "SF Pro Text", system-ui, -apple-system, sans-serif;
+  font-family:
+    Inter,
+    "SF Pro Text",
+    system-ui,
+    -apple-system,
+    sans-serif;
   font-size: 14px;
   color: var(--text);
   background: var(--bg);

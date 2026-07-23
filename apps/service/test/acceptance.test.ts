@@ -7,10 +7,7 @@ import {
 } from "@status-dashboard/model";
 import { afterEach, describe, expect, it } from "vitest";
 
-import {
-  startAcceptanceService,
-  type AcceptanceService,
-} from "./support/acceptance-harness.js";
+import { startAcceptanceService, type AcceptanceService } from "./support/acceptance-harness.js";
 
 const services: AcceptanceService[] = [];
 
@@ -24,9 +21,7 @@ describe("assembled status service", () => {
     services.push(service);
 
     const socket = await service.connect();
-    const message = DashboardSnapshotMessageSchema.parse(
-      await socket.nextMessage(),
-    );
+    const message = DashboardSnapshotMessageSchema.parse(await socket.nextMessage());
 
     expect(message.snapshot).toMatchObject({
       version: 1,
@@ -70,9 +65,7 @@ describe("assembled status service", () => {
         },
       },
     ]);
-    const waiting = DashboardUpdateMessageSchema.parse(
-      await socket.nextMessage(),
-    );
+    const waiting = DashboardUpdateMessageSchema.parse(await socket.nextMessage());
 
     await service.setTime("2026-07-22T12:02:00.000Z");
     await service.pushChanges([
@@ -91,9 +84,7 @@ describe("assembled status service", () => {
         },
       },
     ]);
-    const completed = DashboardUpdateMessageSchema.parse(
-      await socket.nextMessage(),
-    );
+    const completed = DashboardUpdateMessageSchema.parse(await socket.nextMessage());
 
     expect(waiting).toMatchObject({
       version: 2,
@@ -157,9 +148,7 @@ describe("assembled status service", () => {
       },
     ]);
 
-    const message = DashboardUpdateMessageSchema.parse(
-      await socket.nextMessage(),
-    );
+    const message = DashboardUpdateMessageSchema.parse(await socket.nextMessage());
     expect(message).toMatchObject({
       version: 2,
       generatedAt: "2026-07-22T12:02:00.000Z",
@@ -198,9 +187,7 @@ describe("assembled status service", () => {
     ]);
 
     const reconnected = await service.connect();
-    const message = DashboardSnapshotMessageSchema.parse(
-      await reconnected.nextMessage(),
-    );
+    const message = DashboardSnapshotMessageSchema.parse(await reconnected.nextMessage());
     expect(message.snapshot).toMatchObject({
       version: 2,
       generatedAt: "2026-07-22T12:03:00.000Z",
@@ -243,9 +230,7 @@ describe("assembled status service", () => {
         },
       ]);
 
-      const update = DashboardUpdateMessageSchema.parse(
-        await socket.nextMessage(),
-      );
+      const update = DashboardUpdateMessageSchema.parse(await socket.nextMessage());
       expect(update).toMatchObject({
         version: index + 2,
         generatedAt: checkedAt,

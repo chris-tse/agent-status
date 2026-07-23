@@ -7,18 +7,10 @@ import {
 import type { Server, ServerWebSocket } from "bun";
 
 import { SubscriptionBroadcaster } from "./broadcast.js";
-import {
-  isOriginAllowed,
-  loadConfig,
-  type ServiceConfig,
-} from "./config.js";
+import { isOriginAllowed, loadConfig, type ServiceConfig } from "./config.js";
 import { DemoController } from "./demo-controller.js";
 import { HerdrStatusProvider } from "./herdr-provider.js";
-import {
-  isDemoStatusProvider,
-  type ProviderMessage,
-  type StatusProvider,
-} from "./provider.js";
+import { isDemoStatusProvider, type ProviderMessage, type StatusProvider } from "./provider.js";
 import { SimulatedStatusProvider } from "./simulated-provider.js";
 import { type Clock, DashboardStore } from "./store.js";
 
@@ -52,11 +44,7 @@ function corsHeaders(origin: string | null): Headers {
   return headers;
 }
 
-function json(
-  body: unknown,
-  status: number,
-  origin: string | null,
-): Response {
+function json(body: unknown, status: number, origin: string | null): Response {
   const headers = corsHeaders(origin);
   headers.set("Content-Type", "application/json; charset=utf-8");
   return new Response(JSON.stringify(body), { status, headers });
@@ -66,10 +54,7 @@ function wireJson(message: DashboardWireMessage): string {
   return JSON.stringify(message);
 }
 
-function applyProviderMessage(
-  store: DashboardStore,
-  message: ProviderMessage,
-): void {
+function applyProviderMessage(store: DashboardStore, message: ProviderMessage): void {
   if (message.type === "replace") store.replace(message.state);
   else store.apply(message.changes);
 }
@@ -109,17 +94,12 @@ export function handleStatusRequest(
   }
 
   if (url.pathname === "/ws") {
-    if (
-      request.method !== "GET" ||
-      request.headers.get("upgrade")?.toLowerCase() !== "websocket"
-    ) {
+    if (request.method !== "GET" || request.headers.get("upgrade")?.toLowerCase() !== "websocket") {
       return json({ error: "WebSocket upgrade required" }, 426, origin);
     }
 
     const upgraded = context.upgrade?.(request) ?? false;
-    return upgraded
-      ? undefined
-      : json({ error: "WebSocket upgrade failed" }, 400, origin);
+    return upgraded ? undefined : json({ error: "WebSocket upgrade failed" }, 400, origin);
   }
 
   if (request.method === "OPTIONS") {
@@ -166,9 +146,7 @@ export function handleStatusRequest(
   return json({ error: "Not found" }, 404, origin);
 }
 
-export function createStatusServer(
-  options: StatusServerOptions = {},
-): RunningStatusServer {
+export function createStatusServer(options: StatusServerOptions = {}): RunningStatusServer {
   const config = options.config ?? loadConfig(Bun.env);
   const clock = options.clock ?? (() => new Date());
   const broadcaster = new SubscriptionBroadcaster();

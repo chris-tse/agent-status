@@ -9,12 +9,7 @@ import { reduceWireMessage } from "./snapshot";
 
 const DEFAULT_SERVICE_URL = "http://127.0.0.1:4317";
 
-export type FeedPhase =
-  | "connecting"
-  | "live"
-  | "reconnecting"
-  | "disconnected"
-  | "error";
+export type FeedPhase = "connecting" | "live" | "reconnecting" | "disconnected" | "error";
 
 export type DashboardFeed = {
   snapshot: DashboardSnapshot | null;
@@ -64,10 +59,7 @@ type DashboardSocketCallbacks = {
   onPhaseChange: (phase: FeedPhase) => void;
 };
 
-function connectDashboardSocket(
-  url: string,
-  callbacks: DashboardSocketCallbacks,
-): () => void {
+function connectDashboardSocket(url: string, callbacks: DashboardSocketCallbacks): () => void {
   const listeners = new AbortController();
   let socket: WebSocket | null = null;
   let reconnectTimer: ReturnType<typeof setTimeout> | null = null;

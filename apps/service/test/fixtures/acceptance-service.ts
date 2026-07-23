@@ -1,15 +1,7 @@
-import type {
-  AgentResource,
-  DashboardChange,
-  ProviderStatus,
-} from "@status-dashboard/model";
+import type { AgentResource, DashboardChange, ProviderStatus } from "@status-dashboard/model";
 
 import type { ServiceConfig } from "../../src/config.js";
-import type {
-  ProviderConnection,
-  ProviderListener,
-  StatusProvider,
-} from "../../src/provider.js";
+import type { ProviderConnection, ProviderListener, StatusProvider } from "../../src/provider.js";
 import { createStatusServer } from "../../src/server.js";
 import type { DashboardState } from "../../src/store.js";
 
@@ -109,14 +101,10 @@ process.stdin.on("data", (chunk) => {
       stop();
     } else if (command.type === "setTime") {
       now = new Date(command.timestamp);
-      process.stdout.write(
-        `${JSON.stringify({ type: "ack", id: command.id })}\n`,
-      );
+      process.stdout.write(`${JSON.stringify({ type: "ack", id: command.id })}\n`);
     } else if (command.type === "changes") {
       provider.pushChanges(command.changes);
-      process.stdout.write(
-        `${JSON.stringify({ type: "ack", id: command.id })}\n`,
-      );
+      process.stdout.write(`${JSON.stringify({ type: "ack", id: command.id })}\n`);
     } else {
       provider.fail(command.message);
     }

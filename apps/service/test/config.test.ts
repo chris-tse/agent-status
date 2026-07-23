@@ -37,11 +37,7 @@ describe("service provider configuration", () => {
   });
 
   it("rejects unsupported providers and unsafe session names", () => {
-    expect(() => loadConfig({ STATUS_PROVIDER: "other" })).toThrow(
-      /STATUS_PROVIDER/,
-    );
-    expect(() =>
-      loadConfig({ HOME: "/tmp", HERDR_SESSION: "../other" }),
-    ).toThrow(/HERDR_SESSION/);
+    expect(() => loadConfig({ STATUS_PROVIDER: "other" })).toThrow(/STATUS_PROVIDER/);
+    expect(() => loadConfig({ HOME: "/tmp", HERDR_SESSION: "../other" })).toThrow(/HERDR_SESSION/);
   });
 });

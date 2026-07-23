@@ -1,8 +1,4 @@
-import type {
-  DashboardSnapshot,
-  ProviderStatus,
-  StatefulResource,
-} from "@status-dashboard/model";
+import type { DashboardSnapshot, ProviderStatus, StatefulResource } from "@status-dashboard/model";
 
 /**
  * The compact dashboard reduces the wire model's four lifecycle states to the
@@ -29,9 +25,7 @@ const displayRank: Record<DisplayStatus, number> = {
 };
 
 /** Orders attention-needing agents first and the freshest agent first per group. */
-export function orderedAgents(
-  snapshot: DashboardSnapshot,
-): StatefulResource[] {
+export function orderedAgents(snapshot: DashboardSnapshot): StatefulResource[] {
   return [...snapshot.resources].sort((a, b) => {
     const rank = displayRank[displayStatus(a)] - displayRank[displayStatus(b)];
     if (rank !== 0) return rank;
@@ -50,10 +44,6 @@ export function countByStatus(snapshot: DashboardSnapshot): StatusCounts {
 }
 
 /** Providers that are not cleanly connected, for exception-only reporting. */
-export function troubledProviders(
-  snapshot: DashboardSnapshot,
-): ProviderStatus[] {
-  return snapshot.providers.filter(
-    (provider) => provider.connectivity !== "connected",
-  );
+export function troubledProviders(snapshot: DashboardSnapshot): ProviderStatus[] {
+  return snapshot.providers.filter((provider) => provider.connectivity !== "connected");
 }

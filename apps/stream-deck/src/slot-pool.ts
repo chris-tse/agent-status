@@ -34,11 +34,7 @@ function compareSlots(
   [rightId, right]: readonly [string, Slot],
 ): number {
   if (left.position === undefined || right.position === undefined) {
-    return left.position === undefined
-      ? right.position === undefined
-        ? 0
-        : 1
-      : -1;
+    return left.position === undefined ? (right.position === undefined ? 0 : 1) : -1;
   }
 
   return (
@@ -90,9 +86,9 @@ export class SlotPool {
     }
 
     const assigned = new Set(
-      [...this.#slots.values()].map(({ resourceId }) => resourceId).filter(
-        (resourceId): resourceId is string => resourceId !== undefined,
-      ),
+      [...this.#slots.values()]
+        .map(({ resourceId }) => resourceId)
+        .filter((resourceId): resourceId is string => resourceId !== undefined),
     );
     const candidates = resources
       .filter((resource) => !assigned.has(resource.id))
@@ -104,9 +100,7 @@ export class SlotPool {
       }
     }
 
-    return new Map(
-      [...this.#slots].map(([slotId, slot]) => [slotId, slot.resourceId]),
-    );
+    return new Map([...this.#slots].map(([slotId, slot]) => [slotId, slot.resourceId]));
   }
 
   #orderedSlots(): [string, Slot][] {

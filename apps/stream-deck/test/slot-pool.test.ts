@@ -5,11 +5,7 @@ import { SlotPool } from "../src/slot-pool.js";
 
 const baseTime = "2026-07-19T00:00:00.000Z";
 
-function agent(
-  id: string,
-  status: AgentLifecycleStatus,
-  updatedAt = baseTime,
-): AgentResource {
+function agent(id: string, status: AgentLifecycleStatus, updatedAt = baseTime): AgentResource {
   return {
     kind: "agent",
     id,
@@ -66,11 +62,7 @@ describe("SlotPool", () => {
     pool.register("slot-2");
     pool.reconcile([agent("one", "running"), agent("two", "completed")]);
 
-    pool.reconcile([
-      agent("one", "completed"),
-      agent("two", "failed"),
-      agent("three", "waiting"),
-    ]);
+    pool.reconcile([agent("one", "completed"), agent("two", "failed"), agent("three", "waiting")]);
 
     expect(pool.assignmentFor("slot-1")).toBe("one");
     expect(pool.assignmentFor("slot-2")).toBe("two");

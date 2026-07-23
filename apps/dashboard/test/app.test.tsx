@@ -75,9 +75,7 @@ const snapshot = DashboardSnapshotSchema.parse({
 
 const noOp = async () => {};
 
-function renderDashboard(
-  overrides: Partial<React.ComponentProps<typeof DashboardView>> = {},
-) {
+function renderDashboard(overrides: Partial<React.ComponentProps<typeof DashboardView>> = {}) {
   return render(
     <DashboardView
       snapshot={snapshot}
@@ -106,12 +104,7 @@ describe("DashboardView", () => {
     const labels = [...container.querySelectorAll(".agent-row .label")].map(
       (element) => element.textContent,
     );
-    expect(labels).toEqual([
-      "Waiting agent",
-      "Failed agent",
-      "Running agent",
-      "Done agent",
-    ]);
+    expect(labels).toEqual(["Waiting agent", "Failed agent", "Running agent", "Done agent"]);
     expect(screen.getByLabelText("2 blocked")).toBeInTheDocument();
     expect(screen.getByLabelText("1 running")).toBeInTheDocument();
     expect(screen.getByLabelText("1 done")).toBeInTheDocument();
@@ -126,20 +119,14 @@ describe("DashboardView", () => {
       clientY: 60,
     });
 
-    expect(screen.getByRole("tooltip")).toHaveTextContent(
-      "Blocked · cursor/status-dashboard",
-    );
-    expect(screen.getByRole("tooltip")).toHaveTextContent(
-      "Choose a visual direction",
-    );
+    expect(screen.getByRole("tooltip")).toHaveTextContent("Blocked · cursor/status-dashboard");
+    expect(screen.getByRole("tooltip")).toHaveTextContent("Choose a visual direction");
   });
 
   it("toggles rows and tiles and restores the persisted view", () => {
     const first = renderDashboard();
 
-    fireEvent.click(
-      screen.getByRole("button", { name: "Switch to dense tiles" }),
-    );
+    fireEvent.click(screen.getByRole("button", { name: "Switch to dense tiles" }));
     expect(screen.getByTestId("agent-tiles")).toBeInTheDocument();
     expect(window.localStorage.getItem(VIEW_MODE_STORAGE_KEY)).toBe("tiles");
 
@@ -163,9 +150,7 @@ describe("DashboardView", () => {
       refresh,
     });
 
-    expect(
-      screen.getByRole("heading", { name: "Dashboard is offline" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Dashboard is offline" })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Try again" }));
     expect(refresh).toHaveBeenCalledOnce();
   });
@@ -176,9 +161,7 @@ describe("DashboardView", () => {
       error: "Live connection was interrupted",
     });
 
-    expect(screen.getByRole("alert")).toHaveTextContent(
-      "Showing the last valid snapshot",
-    );
+    expect(screen.getByRole("alert")).toHaveTextContent("Showing the last valid snapshot");
     expect(screen.getByText("reconnecting")).toBeInTheDocument();
     expect(screen.getByText("Waiting agent")).toBeInTheDocument();
   });

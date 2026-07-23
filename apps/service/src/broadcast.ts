@@ -1,7 +1,4 @@
-import {
-  DashboardWireMessageSchema,
-  type DashboardWireMessage,
-} from "@status-dashboard/model";
+import { DashboardWireMessageSchema, type DashboardWireMessage } from "@status-dashboard/model";
 
 export type BroadcastListener = (message: DashboardWireMessage) => void;
 

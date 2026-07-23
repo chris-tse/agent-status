@@ -172,12 +172,12 @@ The dashboard exposes a fixed pool of agent slots:
 Keys are small, so appearance should rely primarily on provider identity,
 background color, and restrained motion rather than text.
 
-| State | Appearance |
-| --- | --- |
-| Running | Provider logo, blue background, optional slow pulse |
-| Waiting | Provider logo, amber background |
-| Completed | Provider logo, green background |
-| Failed | Provider logo, red background |
+| State     | Appearance                                          |
+| --------- | --------------------------------------------------- |
+| Running   | Provider logo, blue background, optional slow pulse |
+| Waiting   | Provider logo, amber background                     |
+| Completed | Provider logo, green background                     |
+| Failed    | Provider logo, red background                       |
 
 Short labels are optional. Recognition should not depend on reading.
 

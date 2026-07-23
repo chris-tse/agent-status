@@ -1,8 +1,4 @@
-import type {
-  DashboardChange,
-  DashboardSnapshot,
-  ProviderId,
-} from "@status-dashboard/model";
+import type { DashboardChange, DashboardSnapshot, ProviderId } from "@status-dashboard/model";
 
 import type { DashboardState } from "./store.js";
 
@@ -40,8 +36,6 @@ export interface DemoStatusProvider extends StatusProvider {
   advance(snapshot: DashboardSnapshot, now: Date): ProviderAdvance;
 }
 
-export function isDemoStatusProvider(
-  provider: StatusProvider,
-): provider is DemoStatusProvider {
+export function isDemoStatusProvider(provider: StatusProvider): provider is DemoStatusProvider {
   return "reset" in provider && "advance" in provider;
 }

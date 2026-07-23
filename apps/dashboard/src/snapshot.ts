@@ -25,10 +25,7 @@ function removeById<T extends { id: string }>(items: T[], id: string): T[] {
   return items.filter((item) => item.id !== id);
 }
 
-function applyChange(
-  snapshot: DashboardSnapshot,
-  change: DashboardChange,
-): DashboardSnapshot {
+function applyChange(snapshot: DashboardSnapshot, change: DashboardChange): DashboardSnapshot {
   switch (change.type) {
     case "provider.upsert":
       return {

@@ -1,8 +1,4 @@
-import {
-  HealthResponseSchema,
-  PROTOCOL_VERSION,
-  SERVICE_NAME,
-} from "@status-dashboard/model";
+import { HealthResponseSchema, PROTOCOL_VERSION, SERVICE_NAME } from "@status-dashboard/model";
 import { describe, expect, it } from "vitest";
 
 import { SubscriptionBroadcaster } from "../src/broadcast.js";
@@ -11,9 +7,7 @@ import type { StatusProvider } from "../src/provider.js";
 import { handleStatusRequest, type RequestContext } from "../src/server.js";
 import { DashboardStore } from "../src/store.js";
 
-function createContext(
-  overrides: { providerId?: string } = {},
-): RequestContext {
+function createContext(overrides: { providerId?: string } = {}): RequestContext {
   const clock = () => new Date("2026-07-22T00:00:00.000Z");
   const provider: StatusProvider = {
     id: overrides.providerId ?? "demo",
@@ -32,10 +26,7 @@ async function getHealth(context: RequestContext): Promise<{
   status: number;
   body: unknown;
 }> {
-  const response = handleStatusRequest(
-    new Request("http://127.0.0.1/health"),
-    context,
-  );
+  const response = handleStatusRequest(new Request("http://127.0.0.1/health"), context);
   if (response === undefined) {
     throw new Error("Expected /health to return a response");
   }
@@ -66,9 +57,7 @@ describe("GET /health", () => {
       service: SERVICE_NAME,
       protocolVersion: PROTOCOL_VERSION,
     });
-    expect(typeof (body as { protocolVersion: unknown }).protocolVersion).toBe(
-      "number",
-    );
+    expect(typeof (body as { protocolVersion: unknown }).protocolVersion).toBe("number");
   });
 
   it("keeps the existing fields so current consumers are unaffected", async () => {
@@ -93,8 +82,6 @@ describe("GET /health", () => {
       }),
     ).toBe("incompatible");
 
-    expect(classifyEndpoint({ status: "ok", message: "some other server" })).toBe(
-      "unrelated",
-    );
+    expect(classifyEndpoint({ status: "ok", message: "some other server" })).toBe("unrelated");
   });
 });

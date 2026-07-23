@@ -41,9 +41,7 @@ export class WireState {
         this.#providers = new Map(
           message.snapshot.providers.map((provider) => [provider.id, provider]),
         );
-        this.#events = new Map(
-          message.snapshot.events.map((event) => [event.id, event]),
-        );
+        this.#events = new Map(message.snapshot.events.map((event) => [event.id, event]));
         return true;
 
       case "reset":
