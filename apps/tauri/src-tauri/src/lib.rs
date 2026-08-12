@@ -65,30 +65,6 @@ fn handle_menu_action(app: &AppHandle, id: &str) {
     }
 }
 
-#[tauri::command]
-fn service_status(
-    lifecycle: tauri::State<'_, LifecycleClient>,
-) -> Result<LifecycleOutcome, String> {
-    lifecycle.run(LifecycleAction::Status)
-}
-
-#[tauri::command]
-fn service_start(lifecycle: tauri::State<'_, LifecycleClient>) -> Result<LifecycleOutcome, String> {
-    lifecycle.run(LifecycleAction::Start)
-}
-
-#[tauri::command]
-fn service_stop(lifecycle: tauri::State<'_, LifecycleClient>) -> Result<LifecycleOutcome, String> {
-    lifecycle.run(LifecycleAction::Stop)
-}
-
-#[tauri::command]
-fn service_restart(
-    lifecycle: tauri::State<'_, LifecycleClient>,
-) -> Result<LifecycleOutcome, String> {
-    lifecycle.run(LifecycleAction::Restart)
-}
-
 pub fn run() {
     let app = tauri::Builder::default()
         .menu(|app| {
@@ -116,12 +92,6 @@ pub fn run() {
                     .store(true, std::sync::atomic::Ordering::Release);
             }
         })
-        .invoke_handler(tauri::generate_handler![
-            service_status,
-            service_start,
-            service_stop,
-            service_restart
-        ])
         .setup(|app| {
             let executable = std::env::current_exe()?;
             let resources = app.path().resource_dir()?;
