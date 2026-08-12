@@ -283,3 +283,22 @@
   Routine TypeScript development is still `bun run dev`.
 
 ---
+
+## 2026-08-12 - #7
+
+- Accepted Tauri 2 with the existing TypeScript status service packaged as a
+  separately launchd-supervised Bun helper. This preserves one authoritative
+  service across presentation close and quit, current-login-session crash
+  recovery, and explicit Stop holds.
+- Compared the Electrobun and Tauri spikes across lifecycle correctness,
+  developer workflow, idle resources, installed/distributed size, startup and
+  reconnect behavior, updates, and packaging complexity using their checked-in
+  measurement records.
+- Kept the TypeScript service under the spec's measured-disqualification rule:
+  Tauri's larger package and slower native workflow are real costs, but the
+  measurements do not justify moving provider and service behavior to Rust.
+- Recorded release work that neither spike completed: production update
+  replacement plus Developer ID signing, notarization, stapling, and Gatekeeper
+  verification. Tauri's ad-hoc signature proves local bundle integrity only.
+
+---
