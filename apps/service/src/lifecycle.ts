@@ -193,6 +193,26 @@ export function createServiceLifecycle(options: ServiceLifecycleOptions): Servic
     }
   }
 
+  async function waitUntilStopped(): Promise<ServiceLifecycleStatus> {
+    const deadline = Date.now() + startTimeoutMs;
+    while (true) {
+      const health = await probe();
+      if (health.kind === "unavailable") {
+        return { state: "stopped" };
+      }
+      if (health.kind === "occupied") {
+        throw new Error(health.message);
+      }
+      if (Date.now() >= deadline) {
+        return {
+          state: "unhealthy",
+          message: "The supervised status service did not stop before shutdown timed out.",
+        };
+      }
+      await new Promise((resolve) => setTimeout(resolve, pollIntervalMs));
+    }
+  }
+
   async function start(): Promise<ServiceLifecycleStatus> {
     const existing = await probe();
     if (existing.kind === "compatible") {
@@ -223,6 +243,7 @@ export function createServiceLifecycle(options: ServiceLifecycleOptions): Servic
   async function stop(): Promise<ServiceLifecycleStatus> {
     if (await options.supervisor.isActive()) {
       await options.supervisor.deactivate();
+      return await waitUntilStopped();
     }
     return await inspect();
   }
@@ -232,6 +253,8 @@ export function createServiceLifecycle(options: ServiceLifecycleOptions): Servic
     try {
       if (await options.supervisor.isActive()) {
         await options.supervisor.deactivate();
+        const stopped = await waitUntilStopped();
+        if (stopped.state !== "stopped") return stopped;
       }
       return await start();
     } finally {

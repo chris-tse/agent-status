@@ -105,6 +105,23 @@ See [the Electrobun spike findings](docs/spikes/electrobun.md) for Close and
 Quit semantics, the measured stable build, packaging workflow, and known
 limitations.
 
+## Tauri runtime spike
+
+The Tauri spike packages the real dashboard alongside a bundled Bun runtime and
+TypeScript service. The existing launchd controller supervises that helper
+independently, so the service survives dashboard Close and presentation Quit.
+
+```sh
+bun run --filter '@status-dashboard/tauri' dev
+bun run --filter '@status-dashboard/tauri' build:release
+bun run --filter '@status-dashboard/tauri' smoke
+bun run measure:release --config docs/measurements/configs/tauri.json
+```
+
+Routine provider/dashboard development remains `bun run dev`. See
+[the Tauri findings](docs/spikes/tauri.md) for helper bundling, lifecycle and
+measurement results, packaging cost, and release-signing limitations.
+
 The demo provider remains the default. To read live agents from the default
 Herdr session:
 

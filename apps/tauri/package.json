@@ -1,0 +1,18 @@
+{
+  "name": "@status-dashboard/tauri",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "bun run build:release",
+    "build:dashboard": "VITE_STATUS_SERVICE_URL=http://127.0.0.1:4317 bun run --filter '@status-dashboard/dashboard' build",
+    "build:dev": "bun run build:dashboard && bun run prepare:helper && cargo tauri build --debug --bundles app",
+    "build:release": "bun run build:dashboard && bun run prepare:helper && cargo tauri build",
+    "dev": "bun run build:dashboard && bun run prepare:helper && cargo tauri dev",
+    "dev:reload": "bun run build:dashboard && bun run prepare:helper && cargo check --manifest-path src-tauri/Cargo.toml",
+    "prepare:helper": "bun scripts/prepare-helper.ts",
+    "smoke": "bun scripts/smoke.ts",
+    "typecheck": "tsc --noEmit && cargo check --manifest-path src-tauri/Cargo.toml",
+    "test": "vitest run && cargo test --manifest-path src-tauri/Cargo.toml"
+  }
+}

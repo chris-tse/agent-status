@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "runtime": "Tauri 2.11.5 + Bun 1.3.14 helper",
+  "buildId": "0.1.0-macos-arm64",
+  "workingDirectory": "../../..",
+  "release": {
+    "distributionPath": "../../../apps/tauri/src-tauri/target/release/bundle/dmg/Ambient Status Dashboard_0.1.0_aarch64.dmg",
+    "installedPath": "../../../apps/tauri/src-tauri/target/release/bundle/macos/Ambient Status Dashboard.app"
+  },
+  "commands": {
+    "developerBuild": "bun run --cwd apps/tauri build:dev",
+    "developerReload": "bun run --cwd apps/tauri dev:reload",
+    "launch": "pgrep -f '/System/Library/Frameworks/WebKit.framework/.*/com.apple.WebKit.(GPU|Networking|WebContent)' > /tmp/status-dashboard-tauri-webkit-baseline || :; bun apps/tauri/scripts/control.ts launch",
+    "waitForDashboard": "bun apps/tauri/scripts/control.ts wait-dashboard",
+    "processIds": "bun apps/tauri/scripts/control.ts process-ids",
+    "closeDashboard": "bun apps/tauri/scripts/control.ts close-dashboard",
+    "openDashboard": "bun apps/tauri/scripts/control.ts show-dashboard && bun apps/tauri/scripts/control.ts wait-dashboard",
+    "triggerReconnect": "bun apps/tauri/scripts/control.ts restart-service",
+    "waitForReconnect": "bun apps/tauri/scripts/control.ts wait-dashboard",
+    "stop": "bun apps/tauri/scripts/control.ts stop"
+  },
+  "sampling": {
+    "settleSeconds": 15,
+    "intervalSeconds": 1,
+    "sampleCount": 10
+  }
+}
