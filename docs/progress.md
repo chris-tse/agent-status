@@ -262,3 +262,24 @@
     measurement control endpoint must be removed or secured for production.
 
 ---
+
+## 2026-08-12 - #6
+
+- Added a production-shaped Tauri 2.11.5 macOS application with the real React
+  dashboard, native WebKit, and native tray/application lifecycle controls.
+- Bundled Bun 1.3.14 and standalone service/lifecycle CLI builds. Tauri delegates
+  to the existing GUI-session launchd supervisor, so the service survives
+  window close and full presentation quit, explicit Stop holds, and abnormal
+  helper exits recover with a new PID.
+- Added packaged acceptance over real HTTP and WebSocket seams: immediate
+  snapshot, Close/Quit survival, Stop/Start/Restart, crash recovery, strict
+  code-sign verification, and guaranteed launchd cleanup.
+- A real restart found and fixed a launchd race: after `bootout`, restart now
+  waits for the old endpoint to release before activating its replacement.
+- Recorded the shared release measurement and documented workflow, bundling,
+  supervision, packaging costs, measurements, and residual release-signing work
+  in `docs/spikes/tauri.md`.
+- Generated runtime copies, service bundles, and Cargo targets remain ignored.
+  Routine TypeScript development is still `bun run dev`.
+
+---

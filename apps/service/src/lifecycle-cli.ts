@@ -4,7 +4,7 @@ import {
   type ServiceLifecycleStatus,
 } from "./lifecycle.js";
 
-const USAGE = "Usage: bun run service <status|start|stop|restart>";
+const USAGE = "Usage: bun run service [--json] <status|start|stop|restart>";
 
 export interface LifecycleCliOutput {
   log(message: string): void;
@@ -20,7 +20,8 @@ export async function runLifecycleCli(
   lifecycle: ServiceLifecycle = createDefaultServiceLifecycle(),
   output: LifecycleCliOutput = console,
 ): Promise<number> {
-  const command = arguments_[0];
+  const json = arguments_[0] === "--json";
+  const command = arguments_[json ? 1 : 0];
   if (command !== "status" && command !== "start" && command !== "stop" && command !== "restart") {
     output.error(USAGE);
     return 2;
@@ -28,7 +29,7 @@ export async function runLifecycleCli(
 
   try {
     const status = await lifecycle[command]();
-    output.log(describe(status));
+    output.log(json ? JSON.stringify(status) : describe(status));
     return status.state === "unhealthy" ? 1 : 0;
   } catch (error) {
     output.error(error instanceof Error ? error.message : String(error));

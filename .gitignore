@@ -2,6 +2,10 @@ node_modules/
 dist/
 coverage/
 apps/electrobun/.electrobun/
+apps/tauri/src-tauri/binaries/
+apps/tauri/src-tauri/generated/
+apps/tauri/src-tauri/gen/
+apps/tauri/src-tauri/target/
 vendor/
 *.tsbuildinfo
 .DS_Store
@@ -10,3 +14,4 @@ vendor/
 !.env.example
 !packages/model/tsconfig.json
 !apps/electrobun/tsconfig.json
+!apps/tauri/tsconfig.json
