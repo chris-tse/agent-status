@@ -89,6 +89,9 @@ fn handle(app: &AppHandle, stream: &mut TcpStream) {
             .state::<LifecycleClient>()
             .run(LifecycleAction::Restart)
             .and_then(|outcome| serde_json::to_string(&outcome).map_err(|error| error.to_string())),
+        "/action/open-logs" => crate::diagnostics::open_diagnostic_logs().and_then(|path| {
+            serde_json::to_string(&path.display().to_string()).map_err(|error| error.to_string())
+        }),
         "/action/stop-and-quit" => {
             let lifecycle = app.state::<LifecycleClient>().inner().clone();
             crate::stop_service_and_quit(&lifecycle, || {

@@ -1,4 +1,5 @@
 mod control;
+mod diagnostics;
 mod lifecycle;
 
 pub use lifecycle::{LifecycleAction, LifecycleClient, LifecycleOutcome};
@@ -63,6 +64,15 @@ async fn service_restart(
     run_lifecycle_command(lifecycle.inner().clone(), LifecycleAction::Restart).await
 }
 
+#[tauri::command]
+async fn open_diagnostic_logs() -> Result<String, String> {
+    tauri::async_runtime::spawn_blocking(|| {
+        diagnostics::open_diagnostic_logs().map(|path| path.display().to_string())
+    })
+    .await
+    .map_err(|error| format!("Diagnostic log task failed: {error}"))?
+}
+
 async fn run_lifecycle_command(
     lifecycle: LifecycleClient,
     action: LifecycleAction,
@@ -90,6 +100,13 @@ fn handle_menu_action(app: &AppHandle, id: &str) {
         "service-start" => run_lifecycle(app, LifecycleAction::Start),
         "service-stop" => run_lifecycle(app, LifecycleAction::Stop),
         "service-restart" => run_lifecycle(app, LifecycleAction::Restart),
+        "open-diagnostic-logs" => {
+            std::thread::spawn(|| {
+                if let Err(error) = diagnostics::open_diagnostic_logs() {
+                    eprintln!("could not open diagnostic logs: {error}");
+                }
+            });
+        }
         "quit-presentation" => app.exit(0),
         "stop-and-quit" => {
             let lifecycle = app.state::<LifecycleClient>().inner().clone();
@@ -113,7 +130,8 @@ pub fn run() {
             service_status,
             service_start,
             service_stop,
-            service_restart
+            service_restart,
+            open_diagnostic_logs
         ])
         .menu(|app| {
             let application = SubmenuBuilder::new(app, "Ambient Status Dashboard")
@@ -124,6 +142,7 @@ pub fn run() {
                 .text("service-start", "Start Service")
                 .text("service-stop", "Stop Service")
                 .text("service-restart", "Restart Service")
+                .text("open-diagnostic-logs", "Open Diagnostic Logs")
                 .separator()
                 .text("quit-presentation", "Quit Presentation")
                 .text("stop-and-quit", "Stop Service and Quit")
@@ -164,6 +183,7 @@ pub fn run() {
                 .text("service-start", "Start Service")
                 .text("service-stop", "Stop Service")
                 .text("service-restart", "Restart Service")
+                .text("open-diagnostic-logs", "Open Diagnostic Logs")
                 .separator()
                 .text("quit-presentation", "Quit Presentation")
                 .text("stop-and-quit", "Stop Service and Quit")
@@ -207,9 +227,13 @@ pub fn run() {
 #[cfg(test)]
 mod tests {
     use std::fs;
+    use std::path::PathBuf;
     use std::sync::atomic::{AtomicBool, Ordering};
 
-    use super::{LifecycleAction, LifecycleClient, stop_service_and_quit};
+    use super::{
+        LifecycleAction, LifecycleClient, diagnostics::open_diagnostic_logs_at,
+        stop_service_and_quit,
+    };
 
     #[test]
     fn lifecycle_operations_return_process_and_health_outcomes() {
@@ -288,5 +312,21 @@ mod tests {
 
         assert_eq!(error, "stop failed");
         assert!(!quit.load(Ordering::Acquire));
+    }
+
+    #[test]
+    fn diagnostic_log_action_creates_and_opens_the_service_log_directory() {
+        let temporary = tempfile::tempdir().expect("temporary directory");
+        let logs = temporary.path().join("logs");
+        let mut opened = None::<PathBuf>;
+
+        open_diagnostic_logs_at(&logs, |path| {
+            opened = Some(path.to_path_buf());
+            Ok(())
+        })
+        .expect("open diagnostic logs");
+
+        assert!(logs.is_dir());
+        assert_eq!(opened.as_deref(), Some(logs.as_path()));
     }
 }

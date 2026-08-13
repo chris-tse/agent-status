@@ -1,4 +1,5 @@
 import { useCallback } from "react";
+import type { ProviderStatus } from "@status-dashboard/model";
 
 import { AgentRows } from "./components/agent-rows";
 import { AgentTiles } from "./components/agent-tiles";
@@ -27,44 +28,80 @@ const lifecycleLabels: Record<DesktopLifecycleState, string> = {
   unhealthy: "unhealthy",
 };
 
-function DesktopLifecycleBar({ lifecycle }: { lifecycle: DesktopLifecycleControls }) {
+function DesktopLifecycleBar({
+  lifecycle,
+  providers,
+}: {
+  lifecycle: DesktopLifecycleControls;
+  providers: ProviderStatus[];
+}) {
   return (
-    <section
-      className="service-lifecycle"
-      data-state={lifecycle.state}
-      role="status"
-      aria-label="Service lifecycle"
-    >
-      <span className="service-lifecycle-label">Service</span>
-      <span className="service-lifecycle-state">{lifecycleLabels[lifecycle.state]}</span>
-      {lifecycle.message && (
-        <span className="service-lifecycle-message" role="alert">
-          {lifecycle.message}
-        </span>
-      )}
-      <span className="service-lifecycle-spacer" />
-      <button
-        type="button"
-        disabled={lifecycle.pendingAction !== null}
-        onClick={() => void lifecycle.start()}
+    <div className="desktop-diagnostics">
+      <section
+        className="service-lifecycle"
+        data-state={lifecycle.state}
+        role="status"
+        aria-label="Service lifecycle"
       >
-        Start Service
-      </button>
-      <button
-        type="button"
-        disabled={lifecycle.pendingAction !== null}
-        onClick={() => void lifecycle.stop()}
-      >
-        Stop Service
-      </button>
-      <button
-        type="button"
-        disabled={lifecycle.pendingAction !== null}
-        onClick={() => void lifecycle.restart()}
-      >
-        Restart Service
-      </button>
-    </section>
+        <span className="service-lifecycle-label">Service</span>
+        <span className="service-lifecycle-state">{lifecycleLabels[lifecycle.state]}</span>
+        {lifecycle.message && (
+          <span className="service-lifecycle-message" role="alert">
+            {lifecycle.message}
+          </span>
+        )}
+        {lifecycle.diagnosticError && (
+          <span className="service-lifecycle-message" role="alert">
+            {lifecycle.diagnosticError}
+          </span>
+        )}
+        <span className="service-lifecycle-spacer" />
+        <button
+          type="button"
+          disabled={lifecycle.pendingAction !== null}
+          onClick={() => void lifecycle.start()}
+        >
+          Start Service
+        </button>
+        <button
+          type="button"
+          disabled={lifecycle.pendingAction !== null}
+          onClick={() => void lifecycle.stop()}
+        >
+          Stop Service
+        </button>
+        <button
+          type="button"
+          disabled={lifecycle.pendingAction !== null}
+          onClick={() => void lifecycle.restart()}
+        >
+          Restart Service
+        </button>
+        <button
+          type="button"
+          disabled={lifecycle.isOpeningLogs}
+          onClick={() => void lifecycle.openLogs()}
+        >
+          Open Diagnostic Logs
+        </button>
+      </section>
+      <section className="provider-connectivity" role="status" aria-label="Provider connectivity">
+        <span className="service-lifecycle-label">Provider</span>
+        {providers.length === 0 ? (
+          <span className="provider-connectivity-state">unavailable</span>
+        ) : (
+          providers.map((provider) => (
+            <span className="provider-connectivity-item" key={provider.id}>
+              <span className="provider-connectivity-name">{provider.label ?? provider.id}</span>
+              <span className="provider-connectivity-state">{provider.connectivity}</span>
+              {provider.message && (
+                <span className="provider-connectivity-message">{provider.message}</span>
+              )}
+            </span>
+          ))
+        )}
+      </section>
+    </div>
   );
 }
 
@@ -113,7 +150,7 @@ export function DashboardView({
   if (snapshot === null) {
     return (
       <div className="shell">
-        {desktopLifecycle && <DesktopLifecycleBar lifecycle={desktopLifecycle} />}
+        {desktopLifecycle && <DesktopLifecycleBar lifecycle={desktopLifecycle} providers={[]} />}
         <LoadingState error={error} onRefresh={refresh} />
       </div>
     );
@@ -125,7 +162,9 @@ export function DashboardView({
 
   return (
     <div className="shell">
-      {desktopLifecycle && <DesktopLifecycleBar lifecycle={desktopLifecycle} />}
+      {desktopLifecycle && (
+        <DesktopLifecycleBar lifecycle={desktopLifecycle} providers={snapshot.providers} />
+      )}
       {isShowingStaleSnapshot && (
         <div className="connection-banner" role={error !== null ? "alert" : "status"}>
           <span>{error ?? "Live connection is unavailable"}. Showing the last valid snapshot.</span>

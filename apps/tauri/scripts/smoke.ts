@@ -1,4 +1,5 @@
 import { resolve } from "node:path";
+import { existsSync } from "node:fs";
 
 const repositoryRoot = resolve(import.meta.dir, "../../..");
 const control = resolve(import.meta.dir, "control.ts");
@@ -39,6 +40,11 @@ try {
   command("wait-dashboard");
   const initialService = servicePid();
   if (initialService === undefined) throw new Error("Service did not start on open");
+
+  const logs = JSON.parse(command("open-logs")) as string;
+  if (!logs.endsWith("/Ambient Status Dashboard/logs") || !existsSync(logs)) {
+    throw new Error("Open Diagnostic Logs did not open the packaged service log directory");
+  }
 
   command("close-dashboard");
   const closed = JSON.parse(command("status")) as { presentationOpen: boolean };

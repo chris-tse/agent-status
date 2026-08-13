@@ -12,6 +12,7 @@ export type DesktopLifecycleClient = {
   start: () => Promise<DesktopLifecycleOutcome>;
   stop: () => Promise<DesktopLifecycleOutcome>;
   restart: () => Promise<DesktopLifecycleOutcome>;
+  openLogs: () => Promise<void>;
 };
 
 export type DesktopLifecycleControls = {
@@ -21,9 +22,12 @@ export type DesktopLifecycleControls = {
   start: () => Promise<void>;
   stop: () => Promise<void>;
   restart: () => Promise<void>;
+  isOpeningLogs: boolean;
+  diagnosticError?: string;
+  openLogs: () => Promise<void>;
 };
 
-export type NativeInvoke = (command: string) => Promise<DesktopLifecycleOutcome>;
+export type NativeInvoke = (command: string) => Promise<unknown>;
 
 declare global {
   interface Window {
@@ -37,10 +41,13 @@ declare global {
 
 export function createDesktopLifecycleClient(invoke: NativeInvoke): DesktopLifecycleClient {
   return {
-    status: async () => await invoke("service_status"),
-    start: async () => await invoke("service_start"),
-    stop: async () => await invoke("service_stop"),
-    restart: async () => await invoke("service_restart"),
+    status: async () => (await invoke("service_status")) as DesktopLifecycleOutcome,
+    start: async () => (await invoke("service_start")) as DesktopLifecycleOutcome,
+    stop: async () => (await invoke("service_stop")) as DesktopLifecycleOutcome,
+    restart: async () => (await invoke("service_restart")) as DesktopLifecycleOutcome,
+    openLogs: async () => {
+      await invoke("open_diagnostic_logs");
+    },
   };
 }
 
@@ -48,9 +55,7 @@ function nativeLifecycleClient(): DesktopLifecycleClient | null {
   const invoke = window["__TAURI__"]?.core.invoke;
   return invoke === undefined
     ? null
-    : createDesktopLifecycleClient(
-        async (command) => await invoke<DesktopLifecycleOutcome>(command),
-      );
+    : createDesktopLifecycleClient(async (command) => await invoke<unknown>(command));
 }
 
 function messageFor(error: unknown): string {
@@ -64,6 +69,8 @@ export function useDesktopLifecycle(
   const client = clientOverride === undefined ? nativeClient : clientOverride;
   const [outcome, setOutcome] = useState<DesktopLifecycleOutcome>({ state: "starting" });
   const [pendingAction, setPendingAction] = useState<"start" | "stop" | "restart" | null>(null);
+  const [isOpeningLogs, setIsOpeningLogs] = useState(false);
+  const [diagnosticError, setDiagnosticError] = useState<string>();
   const pendingActionRef = useRef(false);
   const requestGeneration = useRef(0);
 
@@ -117,6 +124,19 @@ export function useDesktopLifecycle(
     [accept, client],
   );
 
+  const openLogs = useCallback(async () => {
+    if (client === null || isOpeningLogs) return;
+    setIsOpeningLogs(true);
+    setDiagnosticError(undefined);
+    try {
+      await client.openLogs();
+    } catch (error) {
+      setDiagnosticError(messageFor(error));
+    } finally {
+      setIsOpeningLogs(false);
+    }
+  }, [client, isOpeningLogs]);
+
   if (client === null) return null;
   return {
     state: outcome.state,
@@ -125,5 +145,8 @@ export function useDesktopLifecycle(
     start: async () => await run("start"),
     stop: async () => await run("stop"),
     restart: async () => await run("restart"),
+    isOpeningLogs,
+    diagnosticError,
+    openLogs,
   };
 }

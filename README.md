@@ -114,6 +114,11 @@ provider connectivity and provides explicit Start Service, Stop Service, and
 Restart Service controls; unrelated or incompatible endpoint occupants are
 shown as lifecycle errors.
 
+The desktop diagnostics strip also shows each provider's connectivity and
+failure message. **Open Diagnostic Logs** in the dashboard, application menu,
+or tray menu opens the launchd service logs under
+`~/Library/Application Support/Ambient Status Dashboard/logs`.
+
 The existing launchd controller supervises the helper independently, so Close
 Dashboard and Quit Presentation destroy or quit only the presentation. Stop
 Service is always deliberate, and Stop Service and Quit performs both actions

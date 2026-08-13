@@ -156,6 +156,8 @@ if (command === "launch") {
   console.log(JSON.stringify(await retry(async () => await action("stop-service"))));
 } else if (command === "restart-service") {
   console.log(JSON.stringify(await retry(async () => await action("restart-service"))));
+} else if (command === "open-logs") {
+  console.log(JSON.stringify(await retry(async () => await action("open-logs"))));
 } else if (command === "close-dashboard" || command === "show-dashboard" || command === "quit") {
   await retry(async () => await action(command));
 } else if (command === "stop-and-quit") {
@@ -165,6 +167,6 @@ if (command === "launch") {
   await action("quit").catch(() => undefined);
 } else {
   throw new Error(
-    "Usage: bun scripts/control.ts <launch|wait-dashboard|status|process-ids|lifecycle-status|start-service|stop-service|restart-service|close-dashboard|show-dashboard|quit|stop-and-quit|stop>",
+    "Usage: bun scripts/control.ts <launch|wait-dashboard|status|process-ids|lifecycle-status|start-service|stop-service|restart-service|open-logs|close-dashboard|show-dashboard|quit|stop-and-quit|stop>",
   );
 }
