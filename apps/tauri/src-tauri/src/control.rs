@@ -11,6 +11,7 @@ use crate::{LifecycleAction, LifecycleClient};
 #[serde(rename_all = "camelCase")]
 struct DesktopStatus {
     service_state: String,
+    service_message: Option<String>,
     presentation_open: bool,
     pid: u32,
 }
@@ -59,6 +60,7 @@ fn handle(app: &AppHandle, stream: &mut TcpStream) {
             lifecycle.run(LifecycleAction::Status).map(|outcome| {
                 serde_json::to_string(&DesktopStatus {
                     service_state: outcome.state,
+                    service_message: outcome.message,
                     presentation_open: app.get_webview_window("main").is_some(),
                     pid: std::process::id(),
                 })
@@ -75,6 +77,26 @@ fn handle(app: &AppHandle, stream: &mut TcpStream) {
             let _ = crate::show_dashboard(&handle);
         })
         .map(|()| "{}".to_string()),
+        "/action/start-service" => app
+            .state::<LifecycleClient>()
+            .run(LifecycleAction::Start)
+            .and_then(|outcome| serde_json::to_string(&outcome).map_err(|error| error.to_string())),
+        "/action/stop-service" => app
+            .state::<LifecycleClient>()
+            .run(LifecycleAction::Stop)
+            .and_then(|outcome| serde_json::to_string(&outcome).map_err(|error| error.to_string())),
+        "/action/restart-service" => app
+            .state::<LifecycleClient>()
+            .run(LifecycleAction::Restart)
+            .and_then(|outcome| serde_json::to_string(&outcome).map_err(|error| error.to_string())),
+        "/action/stop-and-quit" => {
+            let lifecycle = app.state::<LifecycleClient>().inner().clone();
+            crate::stop_service_and_quit(&lifecycle, || {
+                main_thread(app, |handle| handle.exit(0))?;
+                Ok(())
+            })
+            .and_then(|outcome| serde_json::to_string(&outcome).map_err(|error| error.to_string()))
+        }
         "/action/quit" => main_thread(app, |handle| handle.exit(0)).map(|()| "{}".to_string()),
         _ => {
             response(stream, "404 Not Found", "text/plain", "Not found");

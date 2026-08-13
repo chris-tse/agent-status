@@ -4,6 +4,11 @@ import { AgentRows } from "./components/agent-rows";
 import { AgentTiles } from "./components/agent-tiles";
 import { HoverCard, useAgentHover } from "./components/hover-card";
 import { StatusFooter } from "./components/status-footer";
+import {
+  useDesktopLifecycle,
+  type DesktopLifecycleControls,
+  type DesktopLifecycleState,
+} from "./desktop-lifecycle";
 import { countByStatus, orderedAgents, troubledProviders } from "./lib/selectors";
 import { useNow } from "./lib/time";
 import { useViewMode } from "./lib/view-mode";
@@ -11,7 +16,57 @@ import { useDashboardFeed, type DashboardFeed } from "./use-dashboard-feed";
 
 type DashboardViewProps = DashboardFeed & {
   now?: number;
+  desktopLifecycle?: DesktopLifecycleControls | null;
 };
+
+const lifecycleLabels: Record<DesktopLifecycleState, string> = {
+  stopped: "stopped",
+  starting: "starting",
+  running: "running",
+  restarting: "restarting",
+  unhealthy: "unhealthy",
+};
+
+function DesktopLifecycleBar({ lifecycle }: { lifecycle: DesktopLifecycleControls }) {
+  return (
+    <section
+      className="service-lifecycle"
+      data-state={lifecycle.state}
+      role="status"
+      aria-label="Service lifecycle"
+    >
+      <span className="service-lifecycle-label">Service</span>
+      <span className="service-lifecycle-state">{lifecycleLabels[lifecycle.state]}</span>
+      {lifecycle.message && (
+        <span className="service-lifecycle-message" role="alert">
+          {lifecycle.message}
+        </span>
+      )}
+      <span className="service-lifecycle-spacer" />
+      <button
+        type="button"
+        disabled={lifecycle.pendingAction !== null}
+        onClick={() => void lifecycle.start()}
+      >
+        Start Service
+      </button>
+      <button
+        type="button"
+        disabled={lifecycle.pendingAction !== null}
+        onClick={() => void lifecycle.stop()}
+      >
+        Stop Service
+      </button>
+      <button
+        type="button"
+        disabled={lifecycle.pendingAction !== null}
+        onClick={() => void lifecycle.restart()}
+      >
+        Restart Service
+      </button>
+    </section>
+  );
+}
 
 function LoadingState({
   error,
@@ -45,6 +100,7 @@ export function DashboardView({
   refresh,
   runDemoAction,
   now: fixedNow,
+  desktopLifecycle = null,
 }: DashboardViewProps) {
   const clockNow = useNow();
   const now = fixedNow ?? clockNow;
@@ -55,7 +111,12 @@ export function DashboardView({
   const reset = useCallback(() => void runDemoAction("reset"), [runDemoAction]);
 
   if (snapshot === null) {
-    return <LoadingState error={error} onRefresh={refresh} />;
+    return (
+      <div className="shell">
+        {desktopLifecycle && <DesktopLifecycleBar lifecycle={desktopLifecycle} />}
+        <LoadingState error={error} onRefresh={refresh} />
+      </div>
+    );
   }
 
   const agents = orderedAgents(snapshot);
@@ -64,6 +125,7 @@ export function DashboardView({
 
   return (
     <div className="shell">
+      {desktopLifecycle && <DesktopLifecycleBar lifecycle={desktopLifecycle} />}
       {isShowingStaleSnapshot && (
         <div className="connection-banner" role={error !== null ? "alert" : "status"}>
           <span>{error ?? "Live connection is unavailable"}. Showing the last valid snapshot.</span>
@@ -101,5 +163,6 @@ export function DashboardView({
 
 export default function App() {
   const feed = useDashboardFeed();
-  return <DashboardView {...feed} />;
+  const desktopLifecycle = useDesktopLifecycle();
+  return <DashboardView {...feed} desktopLifecycle={desktopLifecycle} />;
 }

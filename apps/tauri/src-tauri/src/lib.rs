@@ -5,7 +5,7 @@ pub use lifecycle::{LifecycleAction, LifecycleClient, LifecycleOutcome};
 
 use tauri::menu::{MenuBuilder, SubmenuBuilder};
 use tauri::tray::TrayIconBuilder;
-use tauri::{AppHandle, Manager, WebviewUrl, WebviewWindowBuilder};
+use tauri::{AppHandle, Manager, State, WebviewUrl, WebviewWindowBuilder};
 
 struct PreserveServiceOnClose(std::sync::atomic::AtomicBool);
 
@@ -32,6 +32,46 @@ fn run_lifecycle(app: &AppHandle, action: LifecycleAction) {
     });
 }
 
+pub(crate) fn stop_service_and_quit(
+    lifecycle: &LifecycleClient,
+    quit: impl FnOnce() -> Result<(), String>,
+) -> Result<LifecycleOutcome, String> {
+    let outcome = lifecycle.run(LifecycleAction::Stop)?;
+    quit()?;
+    Ok(outcome)
+}
+
+#[tauri::command]
+async fn service_status(lifecycle: State<'_, LifecycleClient>) -> Result<LifecycleOutcome, String> {
+    run_lifecycle_command(lifecycle.inner().clone(), LifecycleAction::Status).await
+}
+
+#[tauri::command]
+async fn service_start(lifecycle: State<'_, LifecycleClient>) -> Result<LifecycleOutcome, String> {
+    run_lifecycle_command(lifecycle.inner().clone(), LifecycleAction::Start).await
+}
+
+#[tauri::command]
+async fn service_stop(lifecycle: State<'_, LifecycleClient>) -> Result<LifecycleOutcome, String> {
+    run_lifecycle_command(lifecycle.inner().clone(), LifecycleAction::Stop).await
+}
+
+#[tauri::command]
+async fn service_restart(
+    lifecycle: State<'_, LifecycleClient>,
+) -> Result<LifecycleOutcome, String> {
+    run_lifecycle_command(lifecycle.inner().clone(), LifecycleAction::Restart).await
+}
+
+async fn run_lifecycle_command(
+    lifecycle: LifecycleClient,
+    action: LifecycleAction,
+) -> Result<LifecycleOutcome, String> {
+    tauri::async_runtime::spawn_blocking(move || lifecycle.run(action))
+        .await
+        .map_err(|error| format!("Lifecycle task failed: {error}"))?
+}
+
 fn handle_menu_action(app: &AppHandle, id: &str) {
     match id {
         "show-dashboard" => {
@@ -55,10 +95,12 @@ fn handle_menu_action(app: &AppHandle, id: &str) {
             let lifecycle = app.state::<LifecycleClient>().inner().clone();
             let app = app.clone();
             std::thread::spawn(move || {
-                if let Err(error) = lifecycle.run(LifecycleAction::Stop) {
+                if let Err(error) = stop_service_and_quit(&lifecycle, || {
+                    app.exit(0);
+                    Ok(())
+                }) {
                     eprintln!("could not stop service before quit: {error}");
                 }
-                app.exit(0);
             });
         }
         _ => {}
@@ -67,6 +109,12 @@ fn handle_menu_action(app: &AppHandle, id: &str) {
 
 pub fn run() {
     let app = tauri::Builder::default()
+        .invoke_handler(tauri::generate_handler![
+            service_status,
+            service_start,
+            service_stop,
+            service_restart
+        ])
         .menu(|app| {
             let application = SubmenuBuilder::new(app, "Ambient Status Dashboard")
                 .text("show-dashboard", "Show Dashboard")
@@ -159,8 +207,9 @@ pub fn run() {
 #[cfg(test)]
 mod tests {
     use std::fs;
+    use std::sync::atomic::{AtomicBool, Ordering};
 
-    use super::{LifecycleAction, LifecycleClient};
+    use super::{LifecycleAction, LifecycleClient, stop_service_and_quit};
 
     #[test]
     fn lifecycle_operations_return_process_and_health_outcomes() {
@@ -183,5 +232,61 @@ mod tests {
         assert_eq!(health.protocol_version, 1);
         assert_eq!(health.version, 7);
         assert_eq!(health.provider, "herdr");
+    }
+
+    #[test]
+    fn lifecycle_status_preserves_visible_unhealthy_details() {
+        let temporary = tempfile::tempdir().expect("temporary directory");
+        let script = temporary.path().join("lifecycle.sh");
+        fs::write(
+            &script,
+            r#"printf '%s' '{"state":"unhealthy","health":null,"message":"The status endpoint is occupied by an unrelated process."}'; exit 1"#,
+        )
+        .expect("fixture lifecycle script");
+        let client = LifecycleClient::new("/bin/sh", &script);
+
+        let outcome = client
+            .run(LifecycleAction::Status)
+            .expect("unhealthy lifecycle status remains observable");
+
+        assert_eq!(outcome.state, "unhealthy");
+        assert_eq!(
+            outcome.message.as_deref(),
+            Some("The status endpoint is occupied by an unrelated process.")
+        );
+    }
+
+    #[test]
+    fn lifecycle_helper_failures_remain_errors() {
+        let temporary = tempfile::tempdir().expect("temporary directory");
+        let script = temporary.path().join("lifecycle.sh");
+        fs::write(&script, r#"printf '%s' 'helper failed' >&2; exit 1"#)
+            .expect("fixture lifecycle script");
+        let client = LifecycleClient::new("/bin/sh", &script);
+
+        let error = client
+            .run(LifecycleAction::Status)
+            .expect_err("non-JSON helper failure remains an error");
+
+        assert_eq!(error, "helper failed");
+    }
+
+    #[test]
+    fn stop_service_and_quit_keeps_the_presentation_open_when_stop_fails() {
+        let temporary = tempfile::tempdir().expect("temporary directory");
+        let script = temporary.path().join("lifecycle.sh");
+        fs::write(&script, r#"printf '%s' 'stop failed' >&2; exit 1"#)
+            .expect("fixture lifecycle script");
+        let client = LifecycleClient::new("/bin/sh", &script);
+        let quit = AtomicBool::new(false);
+
+        let error = stop_service_and_quit(&client, || {
+            quit.store(true, Ordering::Release);
+            Ok(())
+        })
+        .expect_err("failed stop prevents presentation quit");
+
+        assert_eq!(error, "stop failed");
+        assert!(!quit.load(Ordering::Acquire));
     }
 }

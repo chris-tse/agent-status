@@ -105,11 +105,19 @@ See [the Electrobun spike findings](docs/spikes/electrobun.md) for Close and
 Quit semantics, the measured stable build, packaging workflow, and known
 limitations.
 
-## Tauri runtime spike
+## Tauri desktop runtime
 
-The Tauri spike packages the real dashboard alongside a bundled Bun runtime and
-TypeScript service. The existing launchd controller supervises that helper
-independently, so the service survives dashboard Close and presentation Quit.
+The Tauri application packages the real dashboard alongside a bundled Bun
+runtime and TypeScript service. Opening it starts a stopped service or reuses a
+compatible instance. The dashboard displays service lifecycle separately from
+provider connectivity and provides explicit Start Service, Stop Service, and
+Restart Service controls; unrelated or incompatible endpoint occupants are
+shown as lifecycle errors.
+
+The existing launchd controller supervises the helper independently, so Close
+Dashboard and Quit Presentation destroy or quit only the presentation. Stop
+Service is always deliberate, and Stop Service and Quit performs both actions
+in that order.
 
 ```sh
 bun run --filter '@status-dashboard/tauri' dev

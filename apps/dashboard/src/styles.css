@@ -58,6 +58,59 @@ button:focus-visible {
   flex-direction: column;
 }
 
+.service-lifecycle {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-raised);
+  font-size: 11px;
+}
+
+.service-lifecycle-label {
+  color: var(--text-dim);
+  font-weight: 650;
+}
+
+.service-lifecycle-state {
+  color: var(--text);
+  text-transform: capitalize;
+}
+
+.service-lifecycle-message {
+  overflow: hidden;
+  color: var(--blocked);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.service-lifecycle-spacer {
+  flex: 1;
+}
+
+.service-lifecycle button {
+  padding: 3px 7px;
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  color: var(--text-dim);
+  background: transparent;
+  cursor: pointer;
+  font-size: 10.5px;
+}
+
+.service-lifecycle button:hover:not(:disabled) {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.service-lifecycle button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
 .dot {
   width: 8px;
   height: 8px;
@@ -314,7 +367,8 @@ button:focus-visible {
 
 .center-state {
   display: grid;
-  min-height: 100vh;
+  flex: 1;
+  min-height: 0;
   place-items: center;
   align-content: center;
   padding: 28px;

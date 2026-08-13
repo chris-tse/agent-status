@@ -165,4 +165,57 @@ describe("DashboardView", () => {
     expect(screen.getByText("reconnecting")).toBeInTheDocument();
     expect(screen.getByText("Waiting agent")).toBeInTheDocument();
   });
+
+  it.each(["stopped", "starting", "running", "restarting", "unhealthy"] as const)(
+    "displays the %s service lifecycle separately from provider connectivity",
+    (state) => {
+      renderDashboard({
+        desktopLifecycle: {
+          state,
+          message:
+            state === "unhealthy"
+              ? "The status endpoint is occupied by an unrelated process."
+              : undefined,
+          pendingAction: null,
+          start: noOp,
+          stop: noOp,
+          restart: noOp,
+        },
+      });
+
+      expect(screen.getByRole("status", { name: "Service lifecycle" })).toHaveTextContent(
+        `Service${state}`,
+      );
+      expect(screen.getByText("1 provider has issues")).toBeInTheDocument();
+      if (state === "unhealthy") {
+        expect(screen.getByRole("alert")).toHaveTextContent(
+          "The status endpoint is occupied by an unrelated process.",
+        );
+      }
+    },
+  );
+
+  it("offers explicit desktop service start, stop, and restart operations", () => {
+    const start = vi.fn(async () => {});
+    const stop = vi.fn(async () => {});
+    const restart = vi.fn(async () => {});
+
+    renderDashboard({
+      desktopLifecycle: {
+        state: "running",
+        pendingAction: null,
+        start,
+        stop,
+        restart,
+      },
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "Start Service" }));
+    fireEvent.click(screen.getByRole("button", { name: "Stop Service" }));
+    fireEvent.click(screen.getByRole("button", { name: "Restart Service" }));
+
+    expect(start).toHaveBeenCalledOnce();
+    expect(stop).toHaveBeenCalledOnce();
+    expect(restart).toHaveBeenCalledOnce();
+  });
 });
