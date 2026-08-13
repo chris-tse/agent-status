@@ -349,3 +349,41 @@
     mutation begins.
 
 ---
+
+## 2026-08-13 - #9
+
+- Added a desktop-only diagnostics strip that labels Service and Provider as
+  separate concepts. Each provider's normalized connectivity and failure
+  message remain visible alongside service lifecycle, so a running service with
+  a disconnected Herdr integration is distinguishable at a glance from a
+  stopped or unhealthy service.
+- Added Open Diagnostic Logs to the dashboard, application menu, and tray menu.
+  The native action creates and opens the launchd service log directory at
+  `~/Library/Application Support/Ambient Status Dashboard/logs`, returning
+  failures to the caller rather than silently succeeding.
+- Extended the packaged control adapter and release smoke to exercise the real
+  log-opening action and verify the resolved directory exists, while preserving
+  the existing lifecycle and final-cleanup coverage.
+- Covered the public UI seam with a running-service/disconnected-Herdr example,
+  the Tauri IPC mapping, and the native directory operation with an injected
+  opener at the operating-system boundary.
+- Files changed:
+  - `apps/dashboard/src/app.tsx`, `desktop-lifecycle.ts`, and `styles.css` —
+    provider diagnostics, log action state, and presentation.
+  - `apps/dashboard/test/app.test.tsx` and `desktop-lifecycle.test.ts` — visible
+    service/provider distinction and IPC action coverage.
+  - `apps/tauri/src-tauri/src/diagnostics.rs`, `lib.rs`, and `control.rs` — log
+    directory resolution, native IPC/menu actions, and packaged control path.
+  - `apps/tauri/scripts/control.ts` and `smoke.ts` — packaged diagnostic action
+    and acceptance coverage.
+  - `README.md`, `docs/spikes/tauri.md`, and `docs/progress.md` — user workflow,
+    corrected limitations, and implementation record.
+- **Learnings for future iterations:**
+  - Provider failure detail already belongs to the shared provider-neutral
+    snapshot; the desktop should render that contract instead of reaching into
+    Herdr-specific state or logs.
+  - Open the same Application Support log directory configured in the launchd
+    plist. Creating it before invoking Finder makes the action useful even when
+    the service has not emitted a log file yet.
+
+---

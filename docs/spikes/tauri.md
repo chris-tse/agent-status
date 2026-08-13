@@ -159,5 +159,6 @@ and lockfile, and measurement/docs artifacts.
   remain release work.
 - The control endpoint is opt-in and loopback-only. A future production
   diagnostic endpoint would need authentication and a product contract.
-- Menus expose all lifecycle actions but do not continuously show transition,
-  provider, or error state and do not open logs; those remain product work.
+- Menus expose lifecycle actions and Open Diagnostic Logs. Continuous service
+  transition, provider connectivity, and failure details are displayed in the
+  desktop dashboard rather than duplicated in static menu labels.

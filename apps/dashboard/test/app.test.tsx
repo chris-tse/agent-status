@@ -180,6 +180,8 @@ describe("DashboardView", () => {
           start: noOp,
           stop: noOp,
           restart: noOp,
+          isOpeningLogs: false,
+          openLogs: noOp,
         },
       });
 
@@ -207,6 +209,8 @@ describe("DashboardView", () => {
         start,
         stop,
         restart,
+        isOpeningLogs: false,
+        openLogs: noOp,
       },
     });
 
@@ -217,5 +221,44 @@ describe("DashboardView", () => {
     expect(start).toHaveBeenCalledOnce();
     expect(stop).toHaveBeenCalledOnce();
     expect(restart).toHaveBeenCalledOnce();
+  });
+
+  it("distinguishes a running service from a provider failure and opens diagnostic logs", () => {
+    const openLogs = vi.fn(async () => {});
+    const herdrFailure = DashboardSnapshotSchema.parse({
+      ...snapshot,
+      providers: [
+        {
+          id: "herdr",
+          label: "Herdr",
+          connectivity: "disconnected",
+          checkedAt: "2026-07-19T07:05:00.000Z",
+          message: "Herdr socket is unavailable.",
+        },
+      ],
+    });
+
+    renderDashboard({
+      snapshot: herdrFailure,
+      desktopLifecycle: {
+        state: "running",
+        pendingAction: null,
+        start: noOp,
+        stop: noOp,
+        restart: noOp,
+        isOpeningLogs: false,
+        openLogs,
+      },
+    });
+
+    expect(screen.getByRole("status", { name: "Service lifecycle" })).toHaveTextContent(
+      "Servicerunning",
+    );
+    expect(screen.getByRole("status", { name: "Provider connectivity" })).toHaveTextContent(
+      "HerdrdisconnectedHerdr socket is unavailable.",
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Open Diagnostic Logs" }));
+    expect(openLogs).toHaveBeenCalledOnce();
   });
 });

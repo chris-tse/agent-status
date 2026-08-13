@@ -17,7 +17,7 @@ function deferred<T>() {
 }
 
 describe("desktop service lifecycle", () => {
-  it("provides status, start, stop, and restart through the native desktop boundary", async () => {
+  it("provides lifecycle and diagnostic actions through the native desktop boundary", async () => {
     const invoke = vi.fn(
       async (command: string): Promise<DesktopLifecycleOutcome> => ({
         state: command === "service_stop" ? "stopped" : "running",
@@ -30,12 +30,14 @@ describe("desktop service lifecycle", () => {
     await expect(lifecycle.start()).resolves.toMatchObject({ state: "running" });
     await expect(lifecycle.stop()).resolves.toMatchObject({ state: "stopped" });
     await expect(lifecycle.restart()).resolves.toMatchObject({ state: "running" });
+    await expect(lifecycle.openLogs()).resolves.toBeUndefined();
 
     expect(invoke.mock.calls.map(([command]) => command)).toEqual([
       "service_status",
       "service_start",
       "service_stop",
       "service_restart",
+      "open_diagnostic_logs",
     ]);
   });
 
@@ -46,6 +48,7 @@ describe("desktop service lifecycle", () => {
       start: async () => ({ state: "running" }),
       stop: async () => ({ state: "stopped" }),
       restart: async () => ({ state: "running" }),
+      openLogs: async () => {},
     };
     const { result } = renderHook(() => useDesktopLifecycle(lifecycle));
 

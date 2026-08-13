@@ -58,16 +58,26 @@ button:focus-visible {
   flex-direction: column;
 }
 
-.service-lifecycle {
-  display: flex;
+.desktop-diagnostics {
   flex-shrink: 0;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-raised);
+}
+
+.service-lifecycle,
+.provider-connectivity {
+  display: flex;
   align-items: center;
   gap: 8px;
   min-height: 36px;
   padding: 6px 12px;
-  border-bottom: 1px solid var(--border);
-  background: var(--bg-raised);
   font-size: 11px;
+}
+
+.provider-connectivity {
+  min-height: 30px;
+  padding-top: 2px;
+  border-top: 1px solid var(--border);
 }
 
 .service-lifecycle-label {
@@ -109,6 +119,26 @@ button:focus-visible {
 .service-lifecycle button:disabled {
   opacity: 0.45;
   cursor: default;
+}
+
+.provider-connectivity-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.provider-connectivity-name {
+  color: var(--text);
+  font-weight: 650;
+}
+
+.provider-connectivity-state {
+  color: var(--text-dim);
+  text-transform: capitalize;
+}
+
+.provider-connectivity-message {
+  color: var(--blocked);
 }
 
 .dot {
