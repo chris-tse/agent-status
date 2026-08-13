@@ -302,3 +302,50 @@
   verification. Tauri's ad-hoc signature proves local bundle integrity only.
 
 ---
+
+## 2026-08-13 - #8
+
+- Completed the selected Tauri desktop shell around the existing React
+  dashboard and separately supervised TypeScript service. Opening starts a
+  stopped service or reuses a compatible instance; Close Dashboard and Quit
+  Presentation leave it running, while Stop Service and Quit deliberately
+  stops it before exiting.
+- Added a lifecycle bar that displays stopped, starting, running, restarting,
+  and unhealthy independently from provider connectivity, with explicit Start,
+  Stop, and Restart controls and visible unrelated/incompatible-listener errors.
+- Connected the dashboard to async Rust `status`, `start`, `stop`, and `restart`
+  commands through Tauri's supported global IPC boundary. Blocking lifecycle
+  helper work runs off the Tauri event loop, and valid unhealthy JSON remains
+  observable while actual helper failures remain errors.
+- Prevented an already-running status poll from overwriting a later lifecycle
+  action result. Hook-level coverage reproduces the stale-poll ordering through
+  the public controls before proving the completed action remains authoritative.
+- Expanded the packaged lifecycle command and smoke coverage to exercise
+  compatible-instance reuse, distinct unhealthy status, safe unrelated-listener
+  rejection, held Stop, Start, Restart, crash recovery, presentation Quit, Stop
+  Service and Quit, strict code-sign verification, and final launchd/process/
+  listener cleanup. Routine `bun run dev` remains unchanged.
+- Shared one stop-before-quit operation between native menus and packaged
+  controls. A Stop failure keeps the presentation open instead of silently
+  violating the action label, with focused coverage proving Quit is not called.
+- Files changed:
+  - `apps/dashboard/src/desktop-lifecycle.ts`, `apps/dashboard/src/app.tsx`, and
+    `apps/dashboard/src/styles.css` — desktop IPC state and lifecycle controls.
+  - `apps/dashboard/test/desktop-lifecycle.test.ts` and
+    `apps/dashboard/test/app.test.tsx` — public lifecycle and UI coverage.
+  - `apps/tauri/src-tauri/src/lib.rs`, `lifecycle.rs`, `control.rs`, and
+    `tauri.conf.json` — async IPC, outcome handling, product actions, and the
+    supported Tauri frontend global.
+  - `apps/tauri/scripts/control.ts` and `smoke.ts` — packaged lifecycle adapter
+    and acceptance flow.
+  - `README.md`, `docs/progress.md` — user workflow and implementation record.
+- **Learnings for future iterations:**
+  - A lifecycle status can be an observable unhealthy outcome even when the CLI
+    exits nonzero; a Start attempt against the same unrelated listener is a
+    rejected mutation. Keep those contracts distinct in native and smoke-test
+    adapters.
+  - Poll suppression during an action is insufficient when a poll began before
+    the action. Invalidate older requests with a generation token whenever a
+    mutation begins.
+
+---

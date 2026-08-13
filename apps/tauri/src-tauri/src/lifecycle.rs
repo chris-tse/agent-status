@@ -75,6 +75,9 @@ impl LifecycleClient {
             .env("STATUS_PROVIDER", "herdr")
             .output()
             .map_err(|error| format!("Could not run the packaged lifecycle helper: {error}"))?;
+        if let Ok(outcome) = serde_json::from_slice::<LifecycleOutcome>(&output.stdout) {
+            return Ok(outcome);
+        }
         if !output.status.success() {
             let detail = String::from_utf8_lossy(&output.stderr).trim().to_string();
             return Err(if detail.is_empty() {

@@ -30,6 +30,7 @@ async function desktopStatus() {
   if (!response.ok) throw new Error(`Desktop status failed (${response.status})`);
   return (await response.json()) as {
     serviceState: string;
+    serviceMessage?: string;
     presentationOpen: boolean;
     pid: number;
   };
@@ -38,6 +39,7 @@ async function desktopStatus() {
 async function action(name: string) {
   const response = await fetch(`${controlUrl}/action/${name}`, { method: "POST" });
   if (!response.ok) throw new Error(await response.text());
+  return (await response.json()) as unknown;
 }
 
 async function runLifecycle(name: "status" | "start" | "stop" | "restart") {
@@ -50,8 +52,17 @@ async function runLifecycle(name: "status" | "start" | "stop" | "restart") {
     new Response(process.stderr).text(),
     process.exited,
   ]);
+  try {
+    return JSON.parse(stdout) as {
+      state: string;
+      health?: { version: number };
+      message?: string;
+    };
+  } catch {
+    // Fall through so actual helper failures retain their stderr detail.
+  }
   if (exitCode !== 0) throw new Error(stderr.trim() || `Lifecycle ${name} failed`);
-  return JSON.parse(stdout) as { state: string; health?: { version: number } };
+  throw new Error(`Lifecycle ${name} returned invalid JSON`);
 }
 
 async function waitForDashboard() {
@@ -140,18 +151,20 @@ if (command === "launch") {
 } else if (command === "lifecycle-status") {
   console.log(JSON.stringify(await runLifecycle("status")));
 } else if (command === "start-service") {
-  await runLifecycle("start");
+  console.log(JSON.stringify(await retry(async () => await action("start-service"))));
 } else if (command === "stop-service") {
-  await runLifecycle("stop");
+  console.log(JSON.stringify(await retry(async () => await action("stop-service"))));
 } else if (command === "restart-service") {
-  await runLifecycle("restart");
+  console.log(JSON.stringify(await retry(async () => await action("restart-service"))));
 } else if (command === "close-dashboard" || command === "show-dashboard" || command === "quit") {
   await retry(async () => await action(command));
+} else if (command === "stop-and-quit") {
+  await retry(async () => await action("stop-and-quit"));
 } else if (command === "stop") {
   await runLifecycle("stop").catch(() => undefined);
   await action("quit").catch(() => undefined);
 } else {
   throw new Error(
-    "Usage: bun scripts/control.ts <launch|wait-dashboard|status|process-ids|lifecycle-status|start-service|stop-service|restart-service|close-dashboard|show-dashboard|quit|stop>",
+    "Usage: bun scripts/control.ts <launch|wait-dashboard|status|process-ids|lifecycle-status|start-service|stop-service|restart-service|close-dashboard|show-dashboard|quit|stop-and-quit|stop>",
   );
 }
